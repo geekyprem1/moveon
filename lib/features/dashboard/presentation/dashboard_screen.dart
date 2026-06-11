@@ -100,11 +100,11 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   IconData _getStageIcon(String stage) {
-    if (stage.contains('Shock')) return Icons.bolt;
-    if (stage.contains('Withdrawal')) return Icons.sentiment_very_dissatisfied;
-    if (stage.contains('Healing')) return Icons.opacity;
-    if (stage.contains('Growth')) return Icons.spa;
-    return Icons.wb_sunny;
+    if (stage.contains('Shock')) return Icons.bolt_rounded;
+    if (stage.contains('Withdrawal')) return Icons.sentiment_very_dissatisfied_rounded;
+    if (stage.contains('Healing')) return Icons.opacity_rounded;
+    if (stage.contains('Growth')) return Icons.spa_rounded;
+    return Icons.wb_sunny_rounded;
   }
 
   String _getMoodMessage(String mood) {
@@ -142,28 +142,37 @@ class DashboardScreen extends ConsumerWidget {
     ThemeData theme,
   ) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 250),
       margin: const EdgeInsets.symmetric(vertical: 6.0),
       decoration: BoxDecoration(
         color: isDone
-            ? theme.colorScheme.surfaceContainerHighest.withAlpha(40)
+            ? theme.colorScheme.surfaceContainerHighest.withAlpha(64)
             : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDone
               ? theme.colorScheme.outline.withAlpha(10)
-              : theme.colorScheme.outline.withAlpha(30),
+              : theme.colorScheme.outline.withAlpha(25),
           width: 1,
         ),
+        boxShadow: isDone
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withAlpha(4),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
         leading: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isDone
-                ? theme.colorScheme.surfaceContainerHighest
-                : theme.colorScheme.primaryContainer.withAlpha(40),
+                ? theme.colorScheme.surfaceContainerHighest.withAlpha(153)
+                : theme.colorScheme.primaryContainer.withAlpha(51),
             shape: BoxShape.circle,
           ),
           child: Text(
@@ -174,23 +183,34 @@ class DashboardScreen extends ConsumerWidget {
         title: Text(
           task.title,
           style: TextStyle(
-            fontWeight: isDone ? FontWeight.normal : FontWeight.w600,
+            fontSize: 15,
+            fontWeight: isDone ? FontWeight.w400 : FontWeight.w600,
             decoration: isDone ? TextDecoration.lineThrough : null,
             color: isDone
-                ? theme.colorScheme.secondary.withAlpha(150)
+                ? theme.colorScheme.onSurface.withAlpha(102)
                 : theme.colorScheme.onSurface,
+            letterSpacing: -0.1,
           ),
         ),
-        trailing: Transform.scale(
-          scale: 1.1,
-          child: Checkbox(
-            value: isDone,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-            onChanged: (val) {
-              if (val != null) {
-                ref.read(dashboardControllerProvider.notifier).toggleTask(task.id, val);
-              }
-            },
+        trailing: GestureDetector(
+          onTap: () {
+            ref.read(dashboardControllerProvider.notifier).toggleTask(task.id, !isDone);
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 26,
+            height: 26,
+            decoration: BoxDecoration(
+              color: isDone ? theme.colorScheme.primary : Colors.transparent,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isDone ? theme.colorScheme.primary : theme.colorScheme.outline.withAlpha(102),
+                width: 2,
+              ),
+            ),
+            child: isDone
+                ? Icon(Icons.check, size: 15, color: theme.colorScheme.onPrimary)
+                : null,
           ),
         ),
       ),
@@ -209,7 +229,7 @@ class DashboardScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text(
           'Move On',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: -0.5),
         ),
         actions: [
           IconButton(
@@ -249,6 +269,12 @@ class DashboardScreen extends ConsumerWidget {
           );
           final String todayMood = todayMoodEntry.mood;
 
+          // Split greeting for rich typography styling
+          final String greetingText = _getGreetingMessage(user.email);
+          final parts = greetingText.split(', ');
+          final String greetingPrefix = parts.first;
+          final String namePart = parts.length > 1 ? parts.last : 'Friend';
+
           // Trigger shield check and review prompt after build completes
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ref.read(dashboardControllerProvider.notifier).checkAndRefillShields();
@@ -268,28 +294,46 @@ class DashboardScreen extends ConsumerWidget {
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // 1. Welcome Greeting Header
                   Padding(
-                    padding: const EdgeInsets.only(left: 4.0, bottom: 16.0, top: 4.0),
+                    padding: const EdgeInsets.only(left: 4.0, bottom: 24.0, top: 4.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _getGreetingMessage(user.email),
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '$greetingPrefix,\n',
+                                style: theme.textTheme.headlineMedium?.copyWith(
+                                  fontWeight: FontWeight.w300,
+                                  color: theme.colorScheme.onSurface.withAlpha(179),
+                                  letterSpacing: -0.5,
+                                  height: 1.2,
+                                ),
+                              ),
+                              TextSpan(
+                                text: namePart,
+                                style: theme.textTheme.headlineLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: theme.colorScheme.primary,
+                                  letterSpacing: -1.0,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 8),
                         Text(
                           "Take it one breath at a time today.",
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.secondary,
+                            color: theme.colorScheme.secondary.withAlpha(204),
+                            letterSpacing: 0.1,
                           ),
                         ),
                       ],
@@ -297,18 +341,32 @@ class DashboardScreen extends ConsumerWidget {
                   ),
 
                   // 2. Hero Circular Gauge Card
-                  Card(
-                    elevation: 0,
-                    color: theme.colorScheme.primaryContainer.withAlpha(20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      side: BorderSide(
-                        color: theme.colorScheme.primary.withAlpha(30),
-                        width: 1.5,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(28),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withAlpha(20),
+                        width: 1,
                       ),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          theme.colorScheme.surface,
+                          theme.colorScheme.primaryContainer.withAlpha(10),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(5),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 28.0, horizontal: 20.0),
+                      padding: const EdgeInsets.symmetric(vertical: 36.0, horizontal: 24.0),
                       child: Column(
                         children: [
                           // Circular Meter
@@ -318,21 +376,21 @@ class DashboardScreen extends ConsumerWidget {
                               children: [
                                 // Outer Glow Ring or Background Track
                                 SizedBox(
-                                  width: 170,
-                                  height: 170,
+                                  width: 190,
+                                  height: 190,
                                   child: CircularProgressIndicator(
                                     value: 1.0,
-                                    strokeWidth: 12,
-                                    color: theme.colorScheme.primary.withAlpha(20),
+                                    strokeWidth: 10,
+                                    color: theme.colorScheme.onSurface.withAlpha(13),
                                   ),
                                 ),
                                 // Outer Active Progress Ring
                                 SizedBox(
-                                  width: 170,
-                                  height: 170,
+                                  width: 190,
+                                  height: 190,
                                   child: CircularProgressIndicator(
                                     value: recoveryScore / 100.0,
-                                    strokeWidth: 12,
+                                    strokeWidth: 10,
                                     color: scoreColor,
                                     strokeCap: StrokeCap.round,
                                   ),
@@ -344,17 +402,21 @@ class DashboardScreen extends ConsumerWidget {
                                     Text(
                                       '$streak',
                                       style: theme.textTheme.displayLarge?.copyWith(
-                                        fontWeight: FontWeight.w900,
+                                        fontSize: 72,
+                                        fontWeight: FontWeight.w200,
                                         color: theme.colorScheme.primary,
-                                        height: 1.1,
+                                        letterSpacing: -2,
+                                        height: 1.0,
                                       ),
                                     ),
+                                    const SizedBox(height: 4),
                                     Text(
                                       streak == 1 ? 'DAY' : 'DAYS',
                                       style: theme.textTheme.labelMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: theme.colorScheme.secondary,
-                                        letterSpacing: 2.0,
+                                        fontWeight: FontWeight.w800,
+                                        color: theme.colorScheme.secondary.withAlpha(204),
+                                        letterSpacing: 3.0,
+                                        fontSize: 11,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
@@ -362,7 +424,7 @@ class DashboardScreen extends ConsumerWidget {
                                       'STREAK',
                                       style: theme.textTheme.labelSmall?.copyWith(
                                         fontSize: 9,
-                                        color: theme.colorScheme.secondary.withAlpha(180),
+                                        color: theme.colorScheme.secondary.withAlpha(128),
                                         letterSpacing: 1.5,
                                       ),
                                     ),
@@ -371,7 +433,7 @@ class DashboardScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 28),
 
                           // Stage & Progress Row
                           Row(
@@ -379,11 +441,11 @@ class DashboardScreen extends ConsumerWidget {
                             children: [
                               // Stage Pill
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: scoreColor.withAlpha(30),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: scoreColor.withAlpha(100), width: 1),
+                                  color: scoreColor.withAlpha(20),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(color: scoreColor.withAlpha(51), width: 1),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -393,62 +455,72 @@ class DashboardScreen extends ConsumerWidget {
                                       size: 14,
                                       color: scoreColor,
                                     ),
-                                    const SizedBox(width: 6),
+                                    const SizedBox(width: 8),
                                     Text(
                                       stage,
                                       style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 11,
                                         color: scoreColor,
+                                        letterSpacing: 0.1,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 10),
                               // Score Pill
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceContainerHighest.withAlpha(150),
-                                  borderRadius: BorderRadius.circular(20),
+                                  color: theme.colorScheme.surfaceContainerHighest.withAlpha(128),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: theme.colorScheme.outline.withAlpha(20),
+                                    width: 1,
+                                  ),
                                 ),
                                 child: Text(
                                   'Score: ${recoveryScore.toInt()}%',
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                    color: theme.colorScheme.onSurface,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 11,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    letterSpacing: 0.1,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
 
                           // Explanation Text
                           Text(
                             '60% No Contact Streak • 40% Mood Check-ins',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.secondary,
+                              color: theme.colorScheme.secondary.withAlpha(153),
                               fontSize: 11,
+                              letterSpacing: 0.1,
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const Divider(height: 32, indent: 16, endIndent: 16),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Divider(height: 1),
+                          ),
 
                           // Shield Protection Badge (Premium Style)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                             decoration: BoxDecoration(
                               color: user.streakShieldsAvailable > 0
-                                  ? Colors.green.withAlpha(15)
-                                  : Colors.grey.withAlpha(15),
-                              borderRadius: BorderRadius.circular(12),
+                                  ? Colors.green.withAlpha(13)
+                                  : theme.colorScheme.surfaceContainerHighest.withAlpha(77),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: user.streakShieldsAvailable > 0
-                                    ? Colors.green.withAlpha(50)
-                                    : Colors.grey.withAlpha(50),
+                                    ? Colors.green.withAlpha(51)
+                                    : theme.colorScheme.outline.withAlpha(20),
                                 width: 1,
                               ),
                             ),
@@ -458,12 +530,12 @@ class DashboardScreen extends ConsumerWidget {
                               children: [
                                 Icon(
                                   user.streakShieldsAvailable > 0
-                                      ? Icons.shield
+                                      ? Icons.verified_user_rounded
                                       : Icons.shield_outlined,
                                   size: 16,
                                   color: user.streakShieldsAvailable > 0
                                       ? Colors.green
-                                      : Colors.grey,
+                                      : theme.colorScheme.secondary.withAlpha(128),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
@@ -471,17 +543,18 @@ class DashboardScreen extends ConsumerWidget {
                                       ? 'Streak Shield Active (1 Freeze available)'
                                       : 'Shield Used (Recharging in 7 days)',
                                   style: TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 12,
                                     color: user.streakShieldsAvailable > 0
                                         ? Colors.green
-                                        : Colors.grey,
-                                    fontWeight: FontWeight.bold,
+                                        : theme.colorScheme.secondary.withAlpha(204),
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 0.1,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 20),
 
                           // Low-profile Break Link
                           GestureDetector(
@@ -489,41 +562,50 @@ class DashboardScreen extends ConsumerWidget {
                             child: Text(
                               'Broke No Contact? Reset Streak',
                               style: TextStyle(
-                                color: theme.colorScheme.error.withAlpha(200),
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                decoration: TextDecoration.underline,
-                              ),
+                                  color: theme.colorScheme.error.withAlpha(204),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  decoration: TextDecoration.underline,
+                                  letterSpacing: 0.1),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // 3. Daily Mood Check-In Card
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
                         color: theme.colorScheme.outline.withAlpha(20),
                         width: 1,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(18.0),
+                      padding: const EdgeInsets.all(24.0),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'How is your heart today?',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 18,
+                              letterSpacing: -0.2,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -570,24 +652,29 @@ class DashboardScreen extends ConsumerWidget {
                             ],
                           ),
                           if (todayMood.isNotEmpty) ...[
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 20),
                             AnimatedContainer(
                               duration: const Duration(milliseconds: 300),
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
-                                borderRadius: BorderRadius.circular(12),
+                                color: theme.colorScheme.primaryContainer.withAlpha(38),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: theme.colorScheme.primary.withAlpha(20),
+                                  width: 1,
+                                ),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.favorite, size: 16, color: Colors.redAccent),
-                                  const SizedBox(width: 8),
+                                  Icon(Icons.favorite_rounded, size: 18, color: theme.colorScheme.primary),
+                                  const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
                                       _getMoodMessage(todayMood),
-                                      style: theme.textTheme.bodySmall?.copyWith(
+                                      style: theme.textTheme.bodyMedium?.copyWith(
                                         fontStyle: FontStyle.italic,
                                         fontWeight: FontWeight.w500,
+                                        color: theme.colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),
@@ -599,20 +686,27 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // 4. Daily Healing Goals Card
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
                         color: theme.colorScheme.outline.withAlpha(20),
                         width: 1,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(18.0),
+                      padding: const EdgeInsets.all(24.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -621,20 +715,29 @@ class DashboardScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 'Daily Healing Goals',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 18,
+                                  letterSpacing: -0.2,
                                 ),
                               ),
-                              Text(
-                                '${_getCompletedCount(completedTasks)} / ${AppTasks.defaultTasks.length} Completed',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer.withAlpha(102),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  '${_getCompletedCount(completedTasks)} / ${AppTasks.defaultTasks.length} Done',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.primary,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 16),
                           ...AppTasks.defaultTasks.map((task) {
                             final bool isDone = completedTasks.contains(task.id);
                             return _buildGoalTile(context, ref, task, isDone, theme);
@@ -643,121 +746,155 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // 5. Journal Notes Card (Write to Heal)
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(
-                        color: theme.colorScheme.secondary.withAlpha(30),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: theme.colorScheme.secondary.withAlpha(20),
                         width: 1,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
-                    color: theme.colorScheme.secondaryContainer.withAlpha(20),
-                    child: InkWell(
-                      onTap: () => ref.read(activeTabProvider.notifier).state = 1,
-                      borderRadius: BorderRadius.circular(20),
-                      child: Padding(
-                        padding: const EdgeInsets.all(18.0),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.secondaryContainer,
-                                borderRadius: BorderRadius.circular(14),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => ref.read(activeTabProvider.notifier).state = 1,
+                        borderRadius: BorderRadius.circular(24),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.secondaryContainer.withAlpha(102),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Icon(
+                                  Icons.edit_note_rounded,
+                                  color: theme.colorScheme.onSecondaryContainer,
+                                  size: 24,
+                                ),
                               ),
-                              child: Icon(
-                                Icons.book_outlined,
-                                color: theme.colorScheme.onSecondaryContainer,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Write to Heal',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
+                              const SizedBox(width: 18),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Write to Heal',
+                                      style: theme.textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 16,
+                                        letterSpacing: -0.1,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Pour your thoughts into your private journal.',
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.secondary,
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Pour your thoughts into your private journal.',
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: theme.colorScheme.secondary.withAlpha(204),
+                                        fontSize: 13,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: 14,
-                              color: theme.colorScheme.secondary,
-                            ),
-                          ],
+                              Icon(
+                                Icons.chevron_right_rounded,
+                                size: 20,
+                                color: theme.colorScheme.secondary.withAlpha(153),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // 6. SOS Safety Net Card (Emergency)
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
+                  Container(
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
-                      side: BorderSide(
-                        color: theme.colorScheme.error.withAlpha(40),
-                        width: 1.5,
+                      border: Border.all(
+                        color: theme.colorScheme.error.withAlpha(31),
+                        width: 1,
                       ),
+                      gradient: LinearGradient(
+                        colors: theme.brightness == Brightness.dark
+                            ? [
+                                theme.colorScheme.errorContainer.withAlpha(20),
+                                theme.colorScheme.errorContainer.withAlpha(8),
+                              ]
+                            : [
+                                const Color(0xFFFFF8F6),
+                                const Color(0xFFFFF1EE),
+                              ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.colorScheme.error.withAlpha(5),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
                     ),
-                    color: theme.colorScheme.errorContainer.withAlpha(25),
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.all(24.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.errorContainer,
+                                  color: theme.colorScheme.errorContainer.withAlpha(153),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
-                                  Icons.heart_broken,
+                                  Icons.heart_broken_rounded,
                                   color: theme.colorScheme.onErrorContainer,
                                   size: 20,
                                 ),
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: 14),
                               Expanded(
                                 child: Text(
                                   'Urge to contact your ex? 🆘',
                                   style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w800,
                                     color: theme.colorScheme.onErrorContainer,
+                                    fontSize: 16,
+                                    letterSpacing: -0.1,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 14),
                           Text(
                             'Before you text or call, take a pause. We have exercises, breathing guides, and delay timers ready to help you hold boundaries.',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onErrorContainer.withAlpha(200),
-                              height: 1.3,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onErrorContainer.withAlpha(204),
+                              fontSize: 13,
+                              height: 1.4,
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 20),
                           ElevatedButton.icon(
                             onPressed: () {
                               ref.read(analyticsServiceProvider).logEmergencyClicked();
@@ -768,15 +905,18 @@ class DashboardScreen extends ConsumerWidget {
                                 recoveryScore,
                               );
                             },
-                            icon: const Icon(Icons.shield_outlined),
-                            label: const Text('Open Emergency Toolkit'),
+                            icon: const Icon(Icons.favorite_rounded, size: 16),
+                            label: const Text(
+                              'Open Emergency Toolkit',
+                              style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.1),
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: theme.colorScheme.errorContainer,
                               foregroundColor: theme.colorScheme.onErrorContainer,
                               elevation: 0,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                             ),
                           ),
@@ -787,13 +927,15 @@ class DashboardScreen extends ConsumerWidget {
 
                   // 7. Recent Moods Timeline
                   if (moodHistory.isNotEmpty) ...[
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 28),
                     Padding(
-                      padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
+                      padding: const EdgeInsets.only(left: 4.0, bottom: 16.0),
                       child: Text(
                         'Recent Mood Timeline',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          letterSpacing: -0.2,
                         ),
                       ),
                     ),
@@ -813,15 +955,22 @@ class DashboardScreen extends ConsumerWidget {
                             Column(
                               children: [
                                 Container(
-                                  width: 28,
-                                  height: 28,
+                                  width: 32,
+                                  height: 32,
                                   decoration: BoxDecoration(
-                                    color: theme.colorScheme.surfaceContainerHighest,
+                                    color: theme.colorScheme.surface,
                                     shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withAlpha(10),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                     border: Border.all(
                                       color: AppColors.getScoreColor(
                                         RecoveryCalculator.getMoodValue(log.mood),
-                                      ),
+                                      ).withAlpha(153),
                                       width: 2,
                                     ),
                                   ),
@@ -836,36 +985,39 @@ class DashboardScreen extends ConsumerWidget {
                                                   : log.mood == 'Better'
                                                       ? '🙂'
                                                       : '😁',
-                                      style: const TextStyle(fontSize: 14),
+                                      style: const TextStyle(fontSize: 16),
                                     ),
                                   ),
                                 ),
                                 if (!isLast)
                                   Container(
-                                    width: 2,
-                                    height: 36,
-                                    color: theme.colorScheme.outline.withAlpha(30),
+                                    width: 1.5,
+                                    height: 40,
+                                    color: theme.colorScheme.outline.withAlpha(31),
                                   ),
                               ],
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 18),
                             // Log details
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  const SizedBox(height: 4),
                                   Text(
                                     log.mood,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15,
+                                      color: theme.colorScheme.onSurface,
                                     ),
                                   ),
+                                  const SizedBox(height: 2),
                                   Text(
                                     isToday ? 'Today' : DateFormatter.formatDate(log.timestamp),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme.colorScheme.secondary,
-                                      fontSize: 11,
+                                      color: theme.colorScheme.secondary.withAlpha(179),
+                                      fontSize: 12,
                                     ),
                                   ),
                                   const SizedBox(height: 16),
@@ -903,32 +1055,37 @@ class _MoodOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderCol = isSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withAlpha(40);
+    final borderCol = isSelected
+        ? theme.colorScheme.primary.withAlpha(128)
+        : Colors.transparent;
     final bgCol = isSelected
-        ? theme.colorScheme.primaryContainer.withAlpha(120)
-        : theme.colorScheme.surface;
+        ? theme.colorScheme.primaryContainer.withAlpha(153)
+        : theme.colorScheme.surfaceContainerHighest.withAlpha(77);
 
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedScale(
-          scale: isSelected ? 1.08 : 1.0,
-          duration: const Duration(milliseconds: 200),
+          scale: isSelected ? 1.12 : 1.0,
+          duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutBack,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: const EdgeInsets.symmetric(horizontal: 4.0),
-            padding: const EdgeInsets.symmetric(vertical: 12),
+            duration: const Duration(milliseconds: 250),
+            margin: const EdgeInsets.symmetric(horizontal: 5.0),
+            padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
               color: bgCol,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: borderCol, width: isSelected ? 2.0 : 1.0),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: borderCol,
+                width: isSelected ? 2.0 : 0.0,
+              ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: theme.colorScheme.primary.withAlpha(40),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: theme.colorScheme.primary.withAlpha(38),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
                       )
                     ]
                   : [],
@@ -938,15 +1095,17 @@ class _MoodOption extends StatelessWidget {
               children: [
                 Text(
                   emoji,
-                  style: const TextStyle(fontSize: 28),
+                  style: const TextStyle(fontSize: 32),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary,
+                    fontSize: 11,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant.withAlpha(204),
                   ),
                 ),
               ],
