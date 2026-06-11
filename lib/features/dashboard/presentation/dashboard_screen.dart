@@ -84,6 +84,119 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
+  String _getGreetingMessage(String email) {
+    final name = email.split('@').first;
+    final displayName = name.isNotEmpty
+        ? '${name[0].toUpperCase()}${name.substring(1)}'
+        : 'Friend';
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good Morning, $displayName';
+    } else if (hour < 17) {
+      return 'Good Afternoon, $displayName';
+    } else {
+      return 'Good Evening, $displayName';
+    }
+  }
+
+  IconData _getStageIcon(String stage) {
+    if (stage.contains('Shock')) return Icons.bolt;
+    if (stage.contains('Withdrawal')) return Icons.sentiment_very_dissatisfied;
+    if (stage.contains('Healing')) return Icons.opacity;
+    if (stage.contains('Growth')) return Icons.spa;
+    return Icons.wb_sunny;
+  }
+
+  String _getMoodMessage(String mood) {
+    switch (mood) {
+      case 'Terrible':
+        return "It's okay to cry. Healing is not linear, and we are right here with you. 🤍";
+      case 'Sad':
+        return "Take it easy today. You are allowed to feel this pain. It will pass. 🌸";
+      case 'Okay':
+        return "A calm, neutral day is progress too. You're holding up well. 🍃";
+      case 'Better':
+        return "You are starting to breathe again. Proud of your steps! ✨";
+      case 'Great':
+        return "Hold onto this light. You are reclaiming your joy. 🌟";
+      default:
+        return "Your feelings are valid. Take care of yourself today.";
+    }
+  }
+
+  int _getCompletedCount(Set<String> completedTasks) {
+    int count = 0;
+    for (var task in AppTasks.defaultTasks) {
+      if (completedTasks.contains(task.id)) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  Widget _buildGoalTile(
+    BuildContext context,
+    WidgetRef ref,
+    AppTaskItem task,
+    bool isDone,
+    ThemeData theme,
+  ) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      margin: const EdgeInsets.symmetric(vertical: 6.0),
+      decoration: BoxDecoration(
+        color: isDone
+            ? theme.colorScheme.surfaceContainerHighest.withAlpha(40)
+            : theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDone
+              ? theme.colorScheme.outline.withAlpha(10)
+              : theme.colorScheme.outline.withAlpha(30),
+          width: 1,
+        ),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isDone
+                ? theme.colorScheme.surfaceContainerHighest
+                : theme.colorScheme.primaryContainer.withAlpha(40),
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            task.icon,
+            style: const TextStyle(fontSize: 18),
+          ),
+        ),
+        title: Text(
+          task.title,
+          style: TextStyle(
+            fontWeight: isDone ? FontWeight.normal : FontWeight.w600,
+            decoration: isDone ? TextDecoration.lineThrough : null,
+            color: isDone
+                ? theme.colorScheme.secondary.withAlpha(150)
+                : theme.colorScheme.onSurface,
+          ),
+        ),
+        trailing: Transform.scale(
+          scale: 1.1,
+          child: Checkbox(
+            value: isDone,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            onChanged: (val) {
+              if (val != null) {
+                ref.read(dashboardControllerProvider.notifier).toggleTask(task.id, val);
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(appUserProvider);
@@ -151,7 +264,6 @@ class DashboardScreen extends ConsumerWidget {
 
           return RefreshIndicator(
             onRefresh: () async {
-              // Trigger a sync of journals manually
               await ref.read(journalRepositoryProvider).syncJournals(user.uid);
             },
             child: SingleChildScrollView(
@@ -160,153 +272,229 @@ class DashboardScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Streak Progress Card
+                  // 1. Welcome Greeting Header
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4.0, bottom: 16.0, top: 4.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _getGreetingMessage(user.email),
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Take it one breath at a time today.",
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 2. Hero Circular Gauge Card
                   Card(
+                    elevation: 0,
                     color: theme.colorScheme.primaryContainer.withAlpha(20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      side: BorderSide(
+                        color: theme.colorScheme.primary.withAlpha(30),
+                        width: 1.5,
+                      ),
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.symmetric(vertical: 28.0, horizontal: 20.0),
                       child: Column(
                         children: [
-                          Text(
-                            'NO CONTACT STREAK',
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              letterSpacing: 1.5,
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.secondary,
+                          // Circular Meter
+                          Center(
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Outer Glow Ring or Background Track
+                                SizedBox(
+                                  width: 170,
+                                  height: 170,
+                                  child: CircularProgressIndicator(
+                                    value: 1.0,
+                                    strokeWidth: 12,
+                                    color: theme.colorScheme.primary.withAlpha(20),
+                                  ),
+                                ),
+                                // Outer Active Progress Ring
+                                SizedBox(
+                                  width: 170,
+                                  height: 170,
+                                  child: CircularProgressIndicator(
+                                    value: recoveryScore / 100.0,
+                                    strokeWidth: 12,
+                                    color: scoreColor,
+                                    strokeCap: StrokeCap.round,
+                                  ),
+                                ),
+                                // Inner Content (Streak Days)
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '$streak',
+                                      style: theme.textTheme.displayLarge?.copyWith(
+                                        fontWeight: FontWeight.w900,
+                                        color: theme.colorScheme.primary,
+                                        height: 1.1,
+                                      ),
+                                    ),
+                                    Text(
+                                      streak == 1 ? 'DAY' : 'DAYS',
+                                      style: theme.textTheme.labelMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.secondary,
+                                        letterSpacing: 2.0,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'STREAK',
+                                      style: theme.textTheme.labelSmall?.copyWith(
+                                        fontSize: 9,
+                                        color: theme.colorScheme.secondary.withAlpha(180),
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 24),
+
+                          // Stage & Progress Row
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                '$streak',
-                                style: theme.textTheme.displayMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.primary,
+                              // Stage Pill
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: scoreColor.withAlpha(30),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: scoreColor.withAlpha(100), width: 1),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      _getStageIcon(stage),
+                                      size: 14,
+                                      color: scoreColor,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      stage,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                        color: scoreColor,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                streak == 1 ? 'Day' : 'Days',
-                                style: theme.textTheme.headlineSmall?.copyWith(
-                                  color: theme.colorScheme.secondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          OutlinedButton.icon(
-                            onPressed: () => _showResetDialog(context, ref, user),
-                            icon: const Icon(Icons.refresh, size: 16),
-                            label: const Text('Broke Contact? Reset'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: theme.colorScheme.error,
-                              side: BorderSide(color: theme.colorScheme.error.withAlpha(100)),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                user.streakShieldsAvailable > 0
-                                    ? Icons.verified_user
-                                    : Icons.verified_user_outlined,
-                                size: 16,
-                                color: user.streakShieldsAvailable > 0
-                                    ? Colors.green
-                                    : Colors.grey,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                user.streakShieldsAvailable > 0
-                                    ? 'Streak Shield Active (1 free freeze/wk)'
-                                    : 'Streak Shield Used (Resets in 7 days)',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: user.streakShieldsAvailable > 0
-                                      ? Colors.green
-                                      : Colors.grey,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Recovery Score Gauge Card
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Recovery Progress',
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              // Score Pill
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: scoreColor.withAlpha(40),
-                                  borderRadius: BorderRadius.circular(12),
+                                  color: theme.colorScheme.surfaceContainerHighest.withAlpha(150),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  stage,
+                                  'Score: ${recoveryScore.toInt()}%',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,
-                                    color: scoreColor,
+                                    color: theme.colorScheme.onSurface,
                                   ),
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Text(
-                                '${recoveryScore.toInt()}%',
-                                style: theme.textTheme.headlineLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: scoreColor,
-                                ),
+
+                          // Explanation Text
+                          Text(
+                            '60% No Contact Streak • 40% Mood Check-ins',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.secondary,
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const Divider(height: 32, indent: 16, endIndent: 16),
+
+                          // Shield Protection Badge (Premium Style)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: user.streakShieldsAvailable > 0
+                                  ? Colors.green.withAlpha(15)
+                                  : Colors.grey.withAlpha(15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: user.streakShieldsAvailable > 0
+                                    ? Colors.green.withAlpha(50)
+                                    : Colors.grey.withAlpha(50),
+                                width: 1,
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: LinearProgressIndicator(
-                                        value: recoveryScore / 100.0,
-                                        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                                        color: scoreColor,
-                                        minHeight: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      '60% No Contact Streak • 40% Mood Check-ins',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.secondary,
-                                      ),
-                                    ),
-                                  ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  user.streakShieldsAvailable > 0
+                                      ? Icons.shield
+                                      : Icons.shield_outlined,
+                                  size: 16,
+                                  color: user.streakShieldsAvailable > 0
+                                      ? Colors.green
+                                      : Colors.grey,
                                 ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  user.streakShieldsAvailable > 0
+                                      ? 'Streak Shield Active (1 Freeze available)'
+                                      : 'Shield Used (Recharging in 7 days)',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: user.streakShieldsAvailable > 0
+                                        ? Colors.green
+                                        : Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+
+                          // Low-profile Break Link
+                          GestureDetector(
+                            onTap: () => _showResetDialog(context, ref, user),
+                            child: Text(
+                              'Broke No Contact? Reset Streak',
+                              style: TextStyle(
+                                color: theme.colorScheme.error.withAlpha(200),
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
                               ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
@@ -314,15 +502,23 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
 
-                  // Daily Mood Check-In Card
+                  // 3. Daily Mood Check-In Card
                   Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: theme.colorScheme.outline.withAlpha(20),
+                        width: 1,
+                      ),
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(18.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            'How are you feeling today?',
+                            'How is your heart today?',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
@@ -373,117 +569,234 @@ class DashboardScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
+                          if (todayMood.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.favorite, size: 16, color: Colors.redAccent),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _getMoodMessage(todayMood),
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        fontStyle: FontStyle.italic,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
 
-                  // Daily Tasks Card
+                  // 4. Daily Healing Goals Card
                   Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: theme.colorScheme.outline.withAlpha(20),
+                        width: 1,
+                      ),
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(18.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Daily Healing Goals',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Daily Healing Goals',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '${_getCompletedCount(completedTasks)} / ${AppTasks.defaultTasks.length} Completed',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 12),
                           ...AppTasks.defaultTasks.map((task) {
                             final bool isDone = completedTasks.contains(task.id);
-                            return CheckboxListTile(
-                              value: isDone,
-                              title: Text(task.title),
-                              secondary: Text(task.icon, style: const TextStyle(fontSize: 20)),
-                              contentPadding: EdgeInsets.zero,
-                              onChanged: (val) {
-                                if (val != null) {
-                                  ref
-                                      .read(dashboardControllerProvider.notifier)
-                                      .toggleTask(task.id, val);
-                                }
-                              },
-                            );
+                            return _buildGoalTile(context, ref, task, isDone, theme);
                           }),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
 
-                  // Bottom Controls Row: Journal and Emergency
-                  Row(
-                    children: [
-                      // Journal Button
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => ref.read(activeTabProvider.notifier).state = 1,
-                          icon: const Icon(Icons.book_outlined),
-                          label: const Text('Journal Notes'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            backgroundColor: theme.colorScheme.secondaryContainer,
-                            foregroundColor: theme.colorScheme.onSecondaryContainer,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
+                  // 5. Journal Notes Card (Write to Heal)
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(
+                        color: theme.colorScheme.secondary.withAlpha(30),
+                        width: 1,
                       ),
-                      const SizedBox(width: 12),
-                      // Emergency Button
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            ref.read(analyticsServiceProvider).logEmergencyClicked();
-                            _showEmergencySupport(
-                              context,
-                              ref,
-                              streak,
-                              recoveryScore,
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            backgroundColor: theme.colorScheme.errorContainer,
-                            foregroundColor: theme.colorScheme.onErrorContainer,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            'I Want To Contact My Ex',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Simple Mood History Header
-                  if (moodHistory.isNotEmpty) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Recent Moods',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.secondary,
-                          ),
-                        ),
-                      ],
                     ),
-                    const SizedBox(height: 8),
+                    color: theme.colorScheme.secondaryContainer.withAlpha(20),
+                    child: InkWell(
+                      onTap: () => ref.read(activeTabProvider.notifier).state = 1,
+                      borderRadius: BorderRadius.circular(20),
+                      child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.secondaryContainer,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(
+                                Icons.book_outlined,
+                                color: theme.colorScheme.onSecondaryContainer,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Write to Heal',
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Pour your thoughts into your private journal.',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.secondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 14,
+                              color: theme.colorScheme.secondary,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // 6. SOS Safety Net Card (Emergency)
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                      side: BorderSide(
+                        color: theme.colorScheme.error.withAlpha(40),
+                        width: 1.5,
+                      ),
+                    ),
+                    color: theme.colorScheme.errorContainer.withAlpha(25),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.errorContainer,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.heart_broken,
+                                  color: theme.colorScheme.onErrorContainer,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Urge to contact your ex? 🆘',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onErrorContainer,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Before you text or call, take a pause. We have exercises, breathing guides, and delay timers ready to help you hold boundaries.',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onErrorContainer.withAlpha(200),
+                              height: 1.3,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              ref.read(analyticsServiceProvider).logEmergencyClicked();
+                              _showEmergencySupport(
+                                context,
+                                ref,
+                                streak,
+                                recoveryScore,
+                              );
+                            },
+                            icon: const Icon(Icons.shield_outlined),
+                            label: const Text('Open Emergency Toolkit'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: theme.colorScheme.errorContainer,
+                              foregroundColor: theme.colorScheme.onErrorContainer,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // 7. Recent Moods Timeline
+                  if (moodHistory.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4.0, bottom: 12.0),
+                      child: Text(
+                        'Recent Mood Timeline',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -491,37 +804,75 @@ class DashboardScreen extends ConsumerWidget {
                       itemBuilder: (context, index) {
                         final log = moodHistory[index];
                         final isToday = log.id == todayStr;
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: CircleAvatar(
-                            backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                            child: Text(
-                              log.mood == 'Terrible'
-                                  ? '😭'
-                                  : log.mood == 'Sad'
-                                      ? '😢'
-                                      : log.mood == 'Okay'
-                                          ? '😐'
-                                          : log.mood == 'Better'
-                                              ? '🙂'
-                                              : '😁',
-                              style: const TextStyle(fontSize: 20),
+                        final isLast = index == (moodHistory.length > 5 ? 4 : moodHistory.length - 1);
+
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Timeline stem/indicator
+                            Column(
+                              children: [
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.surfaceContainerHighest,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: AppColors.getScoreColor(
+                                        RecoveryCalculator.getMoodValue(log.mood),
+                                      ),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      log.mood == 'Terrible'
+                                          ? '😭'
+                                          : log.mood == 'Sad'
+                                              ? '😢'
+                                              : log.mood == 'Okay'
+                                                  ? '😐'
+                                                  : log.mood == 'Better'
+                                                      ? '🙂'
+                                                      : '😁',
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                  ),
+                                ),
+                                if (!isLast)
+                                  Container(
+                                    width: 2,
+                                    height: 36,
+                                    color: theme.colorScheme.outline.withAlpha(30),
+                                  ),
+                              ],
                             ),
-                          ),
-                          title: Text(
-                            log.mood,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(
-                            isToday ? 'Today' : DateFormatter.formatDate(log.timestamp),
-                          ),
-                          trailing: Icon(
-                            Icons.check_circle,
-                            color: AppColors.getScoreColor(
-                              RecoveryCalculator.getMoodValue(log.mood),
+                            const SizedBox(width: 16),
+                            // Log details
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    log.mood,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    isToday ? 'Today' : DateFormatter.formatDate(log.timestamp),
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.secondary,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                              ),
                             ),
-                            size: 16,
-                          ),
+                          ],
                         );
                       },
                     ),
@@ -552,35 +903,55 @@ class _MoodOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderCol = isSelected ? theme.colorScheme.primary : Colors.transparent;
-    final bgCol = isSelected ? theme.colorScheme.primaryContainer.withAlpha(100) : Colors.transparent;
+    final borderCol = isSelected ? theme.colorScheme.primary : theme.colorScheme.outline.withAlpha(40);
+    final bgCol = isSelected
+        ? theme.colorScheme.primaryContainer.withAlpha(120)
+        : theme.colorScheme.surface;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: bgCol,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: borderCol, width: 1.5),
-        ),
-        child: Column(
-          children: [
-            Text(
-              emoji,
-              style: const TextStyle(fontSize: 28),
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedScale(
+          scale: isSelected ? 1.08 : 1.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutBack,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.symmetric(horizontal: 4.0),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: bgCol,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: borderCol, width: isSelected ? 2.0 : 1.0),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withAlpha(40),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ]
+                  : [],
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary,
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  emoji,
+                  style: const TextStyle(fontSize: 28),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
