@@ -85,10 +85,19 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   String _getGreetingMessage(String email) {
-    final name = email.split('@').first;
-    final displayName = name.isNotEmpty
-        ? '${name[0].toUpperCase()}${name.substring(1)}'
+    String username = email.split('@').first;
+    // Remove trailing numbers (e.g. geekyprem4 -> geekyprem)
+    username = username.replaceAll(RegExp(r'\d+$'), '');
+    // Replace dots, underscores, dashes with space
+    username = username.replaceAll(RegExp(r'[._-]'), ' ').trim();
+    // Capitalize each word
+    final displayName = username.isNotEmpty
+        ? username.split(' ').map((word) {
+            if (word.isEmpty) return '';
+            return '${word[0].toUpperCase()}${word.substring(1)}';
+          }).join(' ')
         : 'Friend';
+
     final hour = DateTime.now().hour;
     if (hour < 12) {
       return 'Good Morning, $displayName';
