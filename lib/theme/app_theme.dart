@@ -4,6 +4,13 @@ import '../constants/app_colors.dart';
 class AppTheme {
   AppTheme._();
 
+  static ThemeData getTheme(bool isDark, String themeName) {
+    if (themeName == 'sakura') {
+      return isDark ? darkSakuraTheme : lightSakuraTheme;
+    }
+    return isDark ? darkTheme : lightTheme;
+  }
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
@@ -80,6 +87,32 @@ class AppTheme {
       dividerTheme: DividerThemeData(
         thickness: 1,
         color: Colors.grey.shade900,
+      ),
+    );
+  }
+
+  static ThemeData get lightSakuraTheme {
+    return lightTheme.copyWith(
+      colorScheme: const ColorScheme.light(
+        primary: Color(0xFFE91E63), // Pink
+        onPrimary: Colors.white,
+        primaryContainer: Color(0xFFFCE4EC), // Light Pink Container
+        onPrimaryContainer: Color(0xFF880E4F),
+        secondary: Color(0xFF880E4F),
+        onSecondary: Colors.white,
+      ),
+    );
+  }
+
+  static ThemeData get darkSakuraTheme {
+    return darkTheme.copyWith(
+      colorScheme: const ColorScheme.dark(
+        primary: Color(0xFFFF80AB), // Pink glow
+        onPrimary: Color(0xFF880E4F),
+        primaryContainer: Color(0xFF880E4F),
+        onPrimaryContainer: Color(0xFFFF80AB),
+        secondary: Color(0xFFFF80AB),
+        onSecondary: Color(0xFF880E4F),
       ),
     );
   }

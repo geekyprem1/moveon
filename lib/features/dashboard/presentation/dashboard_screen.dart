@@ -6,6 +6,8 @@ import '../../../constants/app_tasks.dart';
 import '../../../providers/providers.dart';
 import '../../../utils/date_formatter.dart';
 import '../../../utils/recovery_calculator.dart';
+import '../../../utils/review_prompt_manager.dart';
+import '../../auth/domain/app_user.dart';
 import '../../emergency/presentation/emergency_dialog.dart';
 import '../../mood/domain/mood_entry.dart';
 import 'dashboard_controller.dart';
@@ -13,27 +15,53 @@ import 'dashboard_controller.dart';
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
-  void _showResetDialog(BuildContext context, WidgetRef ref) {
+  void _showResetDialog(BuildContext context, WidgetRef ref, AppUser user) {
+    final bool hasShield = user.streakShieldsAvailable > 0;
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Reset Streak?'),
-          content: const Text(
-            'Did you break No Contact? This will reset your streak to 0 days. Be honest with yourself—it is part of the healing process.',
+          content: Text(
+            hasShield
+                ? 'Did you break No Contact? You have a Streak Freeze Shield available! Using it will protect your streak so you don’t reset to 0.'
+                : 'Did you break No Contact? This will reset your streak to 0 days. Be honest with yourself—it is part of the healing process.',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
+            if (hasShield)
+              TextButton(
+                onPressed: () async {
+                  final success = await ref
+                      .read(dashboardControllerProvider.notifier)
+                      .useStreakShield();
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                    if (success) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('🛡️ Streak protected by Freeze Shield!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: const Text(
+                  'Use Shield',
+                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                ),
+              ),
             TextButton(
               onPressed: () {
                 ref.read(dashboardControllerProvider.notifier).resetStreak();
                 Navigator.of(context).pop();
               },
               child: Text(
-                'Reset Streak',
+                'Reset to 0',
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
@@ -108,6 +136,19 @@ class DashboardScreen extends ConsumerWidget {
           );
           final String todayMood = todayMoodEntry.mood;
 
+          // Trigger shield check and review prompt after build completes
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(dashboardControllerProvider.notifier).checkAndRefillShields();
+
+            final journalsCount = ref.read(journalListProvider).value?.length ?? 0;
+            ReviewPromptManager.checkAndShow(
+              context,
+              user: user,
+              journalsCount: journalsCount,
+              moodLogsCount: moodHistory.length,
+            );
+          });
+
           return RefreshIndicator(
             onRefresh: () async {
               // Trigger a sync of journals manually
@@ -156,13 +197,41 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 12),
                           OutlinedButton.icon(
-                            onPressed: () => _showResetDialog(context, ref),
+                            onPressed: () => _showResetDialog(context, ref, user),
                             icon: const Icon(Icons.refresh, size: 16),
                             label: const Text('Broke Contact? Reset'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: theme.colorScheme.error,
                               side: BorderSide(color: theme.colorScheme.error.withAlpha(100)),
                             ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                user.streakShieldsAvailable > 0
+                                    ? Icons.verified_user
+                                    : Icons.verified_user_outlined,
+                                size: 16,
+                                color: user.streakShieldsAvailable > 0
+                                    ? Colors.green
+                                    : Colors.grey,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                user.streakShieldsAvailable > 0
+                                    ? 'Streak Shield Active (1 free freeze/wk)'
+                                    : 'Streak Shield Used (Resets in 7 days)',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: user.streakShieldsAvailable > 0
+                                      ? Colors.green
+                                      : Colors.grey,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

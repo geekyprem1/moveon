@@ -11,6 +11,14 @@ class AppUser {
   final DateTime? lastContactDate;
   final int longestStreak;
   final List<String> unlockedAchievements;
+  final int streakShieldsAvailable;
+  final DateTime? lastShieldResetDate;
+  final String referralCode;
+  final String? referredBy;
+  final String selectedTheme;
+  final String themeMode;
+  final DateTime createdAt;
+  final DateTime lastActiveAt;
 
   AppUser({
     required this.uid,
@@ -23,7 +31,17 @@ class AppUser {
     this.lastContactDate,
     this.longestStreak = 0,
     this.unlockedAchievements = const [],
-  });
+    this.streakShieldsAvailable = 1,
+    this.lastShieldResetDate,
+    String? referralCode,
+    this.referredBy,
+    this.selectedTheme = 'classic',
+    this.themeMode = 'system',
+    DateTime? createdAt,
+    DateTime? lastActiveAt,
+  })  : referralCode = referralCode ?? 'MOVEON-${uid.length >= 5 ? uid.substring(0, 5).toUpperCase() : uid.toUpperCase()}',
+        createdAt = createdAt ?? DateTime.now(),
+        lastActiveAt = lastActiveAt ?? DateTime.now();
 
   /// Calculate streak in full days based on lastContactDate
   int get noContactStreak {
@@ -53,6 +71,14 @@ class AppUser {
     DateTime? lastContactDate,
     int? longestStreak,
     List<String>? unlockedAchievements,
+    int? streakShieldsAvailable,
+    DateTime? lastShieldResetDate,
+    String? referralCode,
+    String? referredBy,
+    String? selectedTheme,
+    String? themeMode,
+    DateTime? createdAt,
+    DateTime? lastActiveAt,
   }) {
     return AppUser(
       uid: uid ?? this.uid,
@@ -65,6 +91,14 @@ class AppUser {
       lastContactDate: lastContactDate ?? this.lastContactDate,
       longestStreak: longestStreak ?? this.longestStreak,
       unlockedAchievements: unlockedAchievements ?? this.unlockedAchievements,
+      streakShieldsAvailable: streakShieldsAvailable ?? this.streakShieldsAvailable,
+      lastShieldResetDate: lastShieldResetDate ?? this.lastShieldResetDate,
+      referralCode: referralCode ?? this.referralCode,
+      referredBy: referredBy ?? this.referredBy,
+      selectedTheme: selectedTheme ?? this.selectedTheme,
+      themeMode: themeMode ?? this.themeMode,
+      createdAt: createdAt ?? this.createdAt,
+      lastActiveAt: lastActiveAt ?? this.lastActiveAt,
     );
   }
 
@@ -80,12 +114,23 @@ class AppUser {
       'lastContactDate': lastContactDate != null ? Timestamp.fromDate(lastContactDate!) : null,
       'longestStreak': longestStreak,
       'unlockedAchievements': unlockedAchievements,
+      'streakShieldsAvailable': streakShieldsAvailable,
+      'lastShieldResetDate': lastShieldResetDate != null ? Timestamp.fromDate(lastShieldResetDate!) : null,
+      'referralCode': referralCode,
+      'referredBy': referredBy,
+      'selectedTheme': selectedTheme,
+      'themeMode': themeMode,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'lastActiveAt': Timestamp.fromDate(lastActiveAt),
     };
   }
 
   factory AppUser.fromJson(Map<String, dynamic> json) {
     DateTime? bDate;
     DateTime? cDate;
+    DateTime? sResetDate;
+    DateTime? cAt;
+    DateTime? lActive;
 
     if (json['breakupDate'] is Timestamp) {
       bDate = (json['breakupDate'] as Timestamp).toDate();
@@ -99,8 +144,28 @@ class AppUser {
       cDate = DateTime.tryParse(json['lastContactDate']);
     }
 
+    if (json['lastShieldResetDate'] is Timestamp) {
+      sResetDate = (json['lastShieldResetDate'] as Timestamp).toDate();
+    } else if (json['lastShieldResetDate'] is String) {
+      sResetDate = DateTime.tryParse(json['lastShieldResetDate']);
+    }
+
+    if (json['createdAt'] is Timestamp) {
+      cAt = (json['createdAt'] as Timestamp).toDate();
+    } else if (json['createdAt'] is String) {
+      cAt = DateTime.tryParse(json['createdAt']);
+    }
+
+    if (json['lastActiveAt'] is Timestamp) {
+      lActive = (json['lastActiveAt'] as Timestamp).toDate();
+    } else if (json['lastActiveAt'] is String) {
+      lActive = DateTime.tryParse(json['lastActiveAt']);
+    }
+
+    final uidStr = json['uid'] as String? ?? '';
+
     return AppUser(
-      uid: json['uid'] as String? ?? '',
+      uid: uidStr,
       email: json['email'] as String? ?? '',
       onboarded: json['onboarded'] as bool? ?? false,
       breakupDate: bDate,
@@ -113,6 +178,15 @@ class AppUser {
               ?.map((e) => e.toString())
               .toList() ??
           const [],
+      streakShieldsAvailable: json['streakShieldsAvailable'] as int? ?? 1,
+      lastShieldResetDate: sResetDate,
+      referralCode: json['referralCode'] as String? ?? 
+          'MOVEON-${uidStr.length >= 5 ? uidStr.substring(0, 5).toUpperCase() : uidStr.toUpperCase()}',
+      referredBy: json['referredBy'] as String?,
+      selectedTheme: json['selectedTheme'] as String? ?? 'classic',
+      themeMode: json['themeMode'] as String? ?? 'system',
+      createdAt: cAt,
+      lastActiveAt: lActive,
     );
   }
 }

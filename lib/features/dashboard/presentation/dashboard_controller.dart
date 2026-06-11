@@ -72,6 +72,46 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
     }
   }
 
+  /// Use a streak shield to protect the streak from resetting
+  Future<bool> useStreakShield() async {
+    final user = _ref.read(appUserProvider).value;
+    if (user == null || user.streakShieldsAvailable <= 0) return false;
+
+    state = const AsyncValue.loading();
+    try {
+      final updatedUser = user.copyWith(
+        streakShieldsAvailable: user.streakShieldsAvailable - 1,
+      );
+      final authRepo = _ref.read(authRepositoryProvider);
+      await authRepo.updateUser(updatedUser);
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return false;
+    }
+  }
+
+  /// Check and refill streak shields weekly (max 1 shield)
+  Future<void> checkAndRefillShields() async {
+    final user = _ref.read(appUserProvider).value;
+    if (user == null) return;
+
+    final now = DateTime.now();
+    final lastReset = user.lastShieldResetDate;
+    final needsReset = lastReset == null || now.difference(lastReset).inDays >= 7;
+
+    if (needsReset) {
+      try {
+        final updatedUser = user.copyWith(
+          streakShieldsAvailable: 1,
+          lastShieldResetDate: now,
+        );
+        await _ref.read(authRepositoryProvider).updateUser(updatedUser);
+      } catch (_) {}
+    }
+  }
+
   /// Logout
   Future<void> logout() async {
     await _ref.read(authControllerProvider.notifier).logout();

@@ -82,6 +82,39 @@ class AuthRepository {
     await _firebaseAuth.signOut();
   }
 
+  /// Update last active timestamp
+  Future<void> updateUserActiveTimestamp(String uid) async {
+    try {
+      final docRef = _firestore.collection('users').doc(uid);
+      await docRef.update({
+        'lastActiveAt': Timestamp.fromDate(DateTime.now()),
+      });
+    } catch (_) {
+      // Ignore if update fails (offline mode etc.)
+    }
+  }
+
+  /// Wipe all user data in Firestore (subcollections and parent)
+  Future<void> wipeUserData(String uid) async {
+    final userRef = _firestore.collection('users').doc(uid);
+
+    Future<void> deleteCollection(String name) async {
+      final snap = await userRef.collection(name).get();
+      for (var doc in snap.docs) {
+        await doc.reference.delete();
+      }
+    }
+
+    await deleteCollection('letters');
+    await deleteCollection('moods');
+    await deleteCollection('tasks');
+    await deleteCollection('emergency_clicks');
+    await deleteCollection('sos_completions');
+
+    // Wipe main user profile doc
+    await userRef.delete();
+  }
+
   /// Update user record (e.g. for reset streak or updating details)
   Future<void> updateUser(AppUser user) async {
     await _firestore.collection('users').doc(user.uid).set(user.toJson(), SetOptions(merge: true));

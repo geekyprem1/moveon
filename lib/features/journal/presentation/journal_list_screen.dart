@@ -144,6 +144,7 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'journal_fab',
         onPressed: () => context.go('/journal/new'),
         child: const Icon(Icons.add),
       ),

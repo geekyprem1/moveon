@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
@@ -43,6 +44,13 @@ class NotificationService {
         _showForegroundNotification(message.notification!);
       }
     });
+
+    // 4. Schedule Re-engagement if user is logged in
+    try {
+      if (FirebaseAuth.instance.currentUser != null) {
+        await scheduleReengagementNotifications();
+      }
+    } catch (_) {}
   }
 
   /// Request permissions for iOS and Android 13+
@@ -137,6 +145,66 @@ class NotificationService {
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
+
+    // Reschedule re-engagement notifications as well
+    await scheduleReengagementNotifications();
+  }
+
+  /// Schedule Re-engagement Alerts (24h, 72h, 7d)
+  Future<void> scheduleReengagementNotifications() async {
+    try {
+      await _localNotifications.cancel(201);
+      await _localNotifications.cancel(202);
+      await _localNotifications.cancel(203);
+
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'reengagement_channel',
+        'Re-engagement Alerts',
+        channelDescription: 'Reminders to log in and continue recovery when inactive',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: DarwinNotificationDetails(),
+      );
+
+      final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+
+      // 24h reminder
+      await _localNotifications.zonedSchedule(
+        201,
+        'Your daily check-in is waiting',
+        'Take a moment to record your mood and maintain your streak.',
+        now.add(const Duration(hours: 24)),
+        platformDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+
+      // 72h reminder
+      await _localNotifications.zonedSchedule(
+        202,
+        'Small steps build progress',
+        'It has been 3 days. Reconnect with your healing path.',
+        now.add(const Duration(hours: 72)),
+        platformDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+
+      // 7d reminder
+      await _localNotifications.zonedSchedule(
+        203,
+        'Your healing journey matters',
+        'A week of progress awaits. Let\'s review your insights.',
+        now.add(const Duration(days: 7)),
+        platformDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (_) {}
   }
 
   /// Helper to calculate the next occurrence of a specific time

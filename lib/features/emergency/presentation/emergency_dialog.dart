@@ -69,7 +69,7 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
     super.dispose();
   }
 
-  Future<void> _toggleSound(String soundType, String streamUrl) async {
+  Future<void> _toggleSound(String soundType) async {
     try {
       if (_currentPlayingSound == soundType) {
         await _audioPlayer.stop();
@@ -78,7 +78,8 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
         });
       } else {
         await _audioPlayer.stop();
-        await _audioPlayer.play(UrlSource(streamUrl));
+        final assetPath = soundType == 'rain' ? 'audio/rain.mp3' : 'audio/white_noise.mp3';
+        await _audioPlayer.play(AssetSource(assetPath));
         setState(() {
           _currentPlayingSound = soundType;
         });
@@ -400,10 +401,7 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _toggleSound(
-                    'rain',
-                    'https://www.soundjay.com/nature/sounds/rain-07.mp3',
-                  ),
+                  onPressed: () => _toggleSound('rain'),
                   icon: Icon(
                     _currentPlayingSound == 'rain' ? Icons.stop : Icons.play_arrow,
                     size: 16,
@@ -422,10 +420,7 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => _toggleSound(
-                    'white_noise',
-                    'https://www.soundjay.com/misc/sounds/white-noise-01.mp3',
-                  ),
+                  onPressed: () => _toggleSound('white_noise'),
                   icon: Icon(
                     _currentPlayingSound == 'white_noise' ? Icons.stop : Icons.play_arrow,
                     size: 16,

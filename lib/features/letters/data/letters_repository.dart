@@ -46,13 +46,19 @@ class LettersRepository {
   /// Watch burnt (released) letters
   Stream<List<UnsentLetter>> watchBurntLetters(String uid) {
     return _lettersRef(uid)
-        .where('status', isEqualTo: 'burnt')
-        .orderBy('burntAt', descending: true)
+        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
+      final list = snapshot.docs
           .map((doc) => UnsentLetter.fromJson(doc.data()))
+          .where((letter) => letter.status == 'burnt')
           .toList();
+      list.sort((a, b) {
+        final aTime = a.burntAt ?? a.createdAt;
+        final bTime = b.burntAt ?? b.createdAt;
+        return bTime.compareTo(aTime);
+      });
+      return list;
     });
   }
 

@@ -63,6 +63,13 @@ class AchievementService {
       emoji: '🦋',
       requiredDays: 365,
     ),
+    BadgeDefinition(
+      id: 'referral_supporter',
+      title: 'Community Supporter',
+      description: 'Supported a friend with their recovery.',
+      emoji: '🤝',
+      requiredDays: 0,
+    ),
   ];
 
   static Future<void> checkAndUnlock(WidgetRef ref, AppUser user) async {

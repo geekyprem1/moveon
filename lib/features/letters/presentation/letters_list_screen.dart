@@ -345,6 +345,7 @@ class LettersListScreen extends ConsumerWidget {
           ],
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'letters_fab',
           child: const Icon(Icons.add),
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const LetterComposeScreen()),

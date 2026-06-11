@@ -65,7 +65,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage == 1) {
+    if (_currentPage == 2) {
       // Validate Step 2 inputs
       if (!_formKeyStep2.currentState!.validate()) return;
       final years = int.tryParse(_yearsController.text) ?? 0;
@@ -144,7 +144,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
                 child: LinearProgressIndicator(
-                  value: (_currentPage + 1) / 4.0,
+                  value: (_currentPage + 1) / 6.0,
                   minHeight: 8.0,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
                   color: theme.colorScheme.primary,
@@ -157,14 +157,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Step ${_currentPage + 1} of 4',
+                    'Step ${_currentPage + 1} of 6',
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: theme.colorScheme.secondary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    '${((_currentPage + 1) / 4.0 * 100).toInt()}% Complete',
+                    '${((_currentPage + 1) / 6.0 * 100).toInt()}% Complete',
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -186,10 +186,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   });
                 },
                 children: [
+                  _buildIntroNoContact(theme),
                   _buildStep1(theme),
                   _buildStep2(theme),
                   _buildStep3(theme),
                   _buildStep4(theme),
+                  _buildIntroRecoveryScore(theme),
                 ],
               ),
             ),
@@ -217,7 +219,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ElevatedButton(
                     onPressed: isLoading
                         ? null
-                        : _currentPage < 3
+                        : _currentPage < 5
                             ? _nextPage
                             : _submit,
                     style: ElevatedButton.styleFrom(
@@ -238,7 +240,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                           )
                         : Text(
-                            _currentPage < 3 ? 'Next' : 'Begin Journey',
+                            _currentPage < 5 ? 'Next' : 'Begin Journey',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                   ),
@@ -511,6 +513,113 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // INTRO: No Contact Concept
+  Widget _buildIntroNoContact(ThemeData theme) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          const Text(
+            '🛡️',
+            style: TextStyle(fontSize: 48),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'The No Contact Rule',
+            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Healing begins with space. No Contact is the commitment to pause all communication, checking in, or monitoring your ex.',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Every interaction or social media check re-triggers the chemical addiction of heartbreak. By holding a boundary, you allow your brain’s attachment circuitry to reset and quiet down.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.secondary,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // INTRO: Recovery Score Explanation
+  Widget _buildIntroRecoveryScore(ThemeData theme) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          const Text(
+            '📈',
+            style: TextStyle(fontSize: 48),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Your Recovery Score',
+            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'We help you quantify your healing so you can see your real progress over time.',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primaryContainer.withAlpha(20),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.colorScheme.primary.withAlpha(65)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildScoreItem('🛡️ 60% Streak Weight', 'How consistently you maintain No Contact.'),
+                const SizedBox(height: 12),
+                _buildScoreItem('📝 40% Mood Weight', 'Your daily emotional wellness logs.'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'You will advance from Shock ➔ Withdrawal ➔ Healing ➔ Growth ➔ Move-On as you log your moods and stay strong.',
+            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.secondary, height: 1.5),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScoreItem(String title, String desc) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          desc,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+      ],
     );
   }
 }

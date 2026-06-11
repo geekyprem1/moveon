@@ -95,6 +95,7 @@ final appUserProvider = StreamProvider<AppUser?>((ref) {
   if (authState == null) return Stream.value(null);
 
   final authRepo = ref.watch(authRepositoryProvider);
+  authRepo.updateUserActiveTimestamp(authState.uid);
   return authRepo.watchAppUser(authState.uid);
 });
 
