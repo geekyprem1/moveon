@@ -50,12 +50,12 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
       appBar: AppBar(
         title: const Text(
           'Recovery Insights',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: -0.5),
         ),
         actions: [
           if (isAdmin)
             IconButton(
-              icon: const Icon(Icons.developer_mode),
+              icon: const Icon(Icons.developer_mode_rounded),
               tooltip: 'Dev Analytics',
               onPressed: () {
                 Navigator.of(context).push(
@@ -100,55 +100,93 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
             },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // User Header Info
-                  Card(
+                  // User Header Info Container
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withAlpha(20),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Column(
                         children: [
-                          const CircleAvatar(
-                            radius: 32,
-                            child: Text('👤', style: TextStyle(fontSize: 32)),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primaryContainer.withAlpha(80),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Text('👤', style: TextStyle(fontSize: 32)),
                           ),
                           const SizedBox(height: 12),
                           Text(
                             user.email,
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Breakup Type: ${user.breakupType ?? 'N/A'}',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.secondary,
+                              color: theme.colorScheme.secondary.withAlpha(180),
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // Referral Code & Invites
                   _buildReferralCard(context, user, theme),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // Statistics Grid Card
-                  Card(
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withAlpha(20),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Overall Statistics',
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              letterSpacing: -0.1,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -156,7 +194,7 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             crossAxisCount: 2,
-                            childAspectRatio: 1.5,
+                            childAspectRatio: 1.4,
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 12,
                             children: [
@@ -172,27 +210,44 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // Weekly Progress Summary Card
                   WeeklySummaryCard(moods: moods),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // 1. Recovery Timeline
                   RecoveryTimeline(streakDays: user.noContactStreak),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // Recovery Insights Card
-                  Card(
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withAlpha(20),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Recovery Insights',
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              letterSpacing: -0.1,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -230,12 +285,27 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // Mood Charts Section
-                  Card(
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withAlpha(20),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -245,7 +315,9 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                               Text(
                                 'Mood Analytics',
                                 style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                  letterSpacing: -0.1,
                                 ),
                               ),
                               SegmentedButton<int>(
@@ -265,39 +337,58 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 16),
                           MoodChart(moods: moods, days: _selectedChartDays),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // 2. Craving Heatmap Section
                   CravingHeatmap(clicks: clicks),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // Settings & GDPR Privacy Card
                   _buildSettingsPrivacyCard(context, ref, user, theme),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
 
                   // Achievement Badges Section
-                  Card(
+                  Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withAlpha(20),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withAlpha(4),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Achievements & Milestones',
                             style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              letterSpacing: -0.1,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             'Tap any unlocked achievement to share your milestone.',
-                            style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.secondary),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.secondary.withAlpha(180),
+                            ),
                           ),
                           const SizedBox(height: 16),
                           GridView.builder(
@@ -331,12 +422,12 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
 
   Widget _buildStatItem(String label, String value, Color color, ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: color.withAlpha(20),
-        borderRadius: BorderRadius.circular(12),
+        color: color.withAlpha(15),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: color.withAlpha(60),
+          color: color.withAlpha(40),
           width: 1,
         ),
       ),
@@ -345,20 +436,23 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            label,
+            label.toUpperCase(),
             style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.secondary,
-              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.secondary.withAlpha(180),
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.0,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w900,
               color: color,
+              fontSize: 18,
+              letterSpacing: -0.5,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -375,16 +469,16 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
     required ThemeData theme,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12.0),
+      padding: const EdgeInsets.only(bottom: 16.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            radius: 16,
+            radius: 18,
             backgroundColor: theme.colorScheme.primaryContainer.withAlpha(80),
-            child: Text(icon, style: const TextStyle(fontSize: 14)),
+            child: Text(icon, style: const TextStyle(fontSize: 16)),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,13 +486,15 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                 Text(
                   title,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   desc,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.secondary,
+                    color: theme.colorScheme.secondary.withAlpha(180),
+                    height: 1.3,
                   ),
                 ),
               ],
@@ -411,67 +507,77 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
 
   Widget _buildBadgeWidget(BuildContext context, BadgeDefinition badge, bool isUnlocked, ThemeData theme) {
     final double opacity = isUnlocked ? 1.0 : 0.35;
-    return InkWell(
-      onTap: isUnlocked
-          ? () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => AchievementShareSheet(badge: badge),
-                ),
-              );
-            }
-          : null,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
+    return Container(
+      decoration: BoxDecoration(
+        color: isUnlocked 
+            ? theme.colorScheme.primaryContainer.withAlpha(40) 
+            : theme.colorScheme.surfaceContainerHighest.withAlpha(51),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
           color: isUnlocked 
-              ? theme.colorScheme.primaryContainer.withAlpha(40) 
-              : theme.colorScheme.surfaceContainerHighest.withAlpha(80),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isUnlocked 
-                ? theme.colorScheme.primary.withAlpha(100) 
-                : Colors.transparent,
-          ),
+              ? theme.colorScheme.primary.withAlpha(64) 
+              : theme.colorScheme.outline.withAlpha(15),
+          width: 1,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
-              alignment: Alignment.center,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: isUnlocked
+              ? () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => AchievementShareSheet(badge: badge),
+                    ),
+                  );
+                }
+              : null,
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  badge.emoji,
-                  style: TextStyle(
-                    fontSize: 36,
-                    color: isUnlocked ? null : Colors.grey,
-                  ).copyWith(color: isUnlocked ? null : Colors.grey.withValues(alpha: opacity)),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Text(
+                      badge.emoji,
+                      style: const TextStyle(fontSize: 36).copyWith(color: isUnlocked ? null : Colors.grey.withValues(alpha: opacity)),
+                    ),
+                    if (!isUnlocked)
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withAlpha(128),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.lock_rounded,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+                      ),
+                  ],
                 ),
-                if (!isUnlocked)
-                  const Icon(
-                    Icons.lock,
-                    color: Colors.white70,
-                    size: 20,
-                    shadows: [],
+                const SizedBox(height: 10),
+                Text(
+                  badge.title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isUnlocked 
+                        ? theme.colorScheme.primary 
+                        : theme.colorScheme.secondary.withValues(alpha: opacity),
+                    letterSpacing: -0.1,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              badge.title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: isUnlocked 
-                    ? theme.colorScheme.primary 
-                    : theme.colorScheme.secondary.withValues(alpha: opacity),
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -480,31 +586,54 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
   Widget _buildReferralCard(BuildContext context, AppUser user, ThemeData theme) {
     final hasReferred = user.referredBy != null;
 
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.outline.withAlpha(20),
+          width: 1,
+                    ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(4),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               'Support Recovery Together 🤝',
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                letterSpacing: -0.1,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             Text(
               'Invite a friend to unlock the Sakura Theme and a Community Supporter badge.',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.secondary,
+                color: theme.colorScheme.secondary.withAlpha(180),
+                fontSize: 12,
+                height: 1.3,
               ),
             ),
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest.withAlpha(80),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withAlpha(15),
+                  width: 1,
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -516,23 +645,25 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                         'YOUR REFERRAL CODE',
                         style: theme.textTheme.labelSmall?.copyWith(
                           fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.secondary,
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.secondary.withAlpha(150),
+                          letterSpacing: 1.0,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 4),
                       Text(
                         user.referralCode,
                         style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
                           color: theme.colorScheme.primary,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
                   ),
                   IconButton(
-                    icon: const Icon(Icons.copy, size: 18),
+                    icon: const Icon(Icons.copy_rounded, size: 18),
                     tooltip: 'Copy Code',
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: user.referralCode));
@@ -544,15 +675,15 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             if (hasReferred)
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.check_circle, color: Colors.green, size: 16),
-                    const SizedBox(width: 6),
+                    const Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
+                    const SizedBox(width: 8),
                     Text(
                       'Referred by: ${user.referredBy}',
                       style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 13),
@@ -568,10 +699,13 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                     builder: (context) => ReferralSystemDialog(user: user),
                   );
                 },
-                icon: const Icon(Icons.group_add, size: 18),
-                label: const Text('Enter Friend’s Code'),
+                icon: const Icon(Icons.group_add_rounded, size: 18),
+                label: const Text('Enter Friend’s Code', style: TextStyle(fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
               ),
           ],
@@ -664,7 +798,7 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                       title: const Text('Classic Theme'),
                       subtitle: const Text('Calming purple design'),
                       trailing: latestUser.selectedTheme == 'classic'
-                          ? Icon(Icons.radio_button_checked, color: theme.colorScheme.primary)
+                           ? Icon(Icons.radio_button_checked, color: theme.colorScheme.primary)
                           : const Icon(Icons.radio_button_off),
                       onTap: () async {
                         final updatedUser = latestUser.copyWith(selectedTheme: 'classic');
@@ -826,16 +960,33 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
   }
 
   Widget _buildSettingsPrivacyCard(BuildContext context, WidgetRef ref, AppUser user, ThemeData theme) {
-    return Card(
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.outline.withAlpha(20),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(4),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               'Settings & GDPR Privacy',
               style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                letterSpacing: -0.1,
               ),
             ),
             const SizedBox(height: 12),

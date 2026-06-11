@@ -197,7 +197,7 @@ class DashboardScreen extends ConsumerWidget {
             ref.read(dashboardControllerProvider.notifier).toggleTask(task.id, !isDone);
           },
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 250),
             width: 26,
             height: 26,
             decoration: BoxDecoration(
@@ -269,7 +269,36 @@ class DashboardScreen extends ConsumerWidget {
           );
           final String todayMood = todayMoodEntry.mood;
 
+          // Split greeting for rich typography styling
+          final String greetingText = _getGreetingMessage(user.email);
+          final parts = greetingText.split(', ');
+          final String greetingPrefix = parts.first;
+          final String namePart = parts.length > 1 ? parts.last : 'Friend';
+
           final bool isDark = theme.brightness == Brightness.dark;
+
+          // Dynamic Next Milestone Math
+          String nextMilestoneName = '3 Days Strong';
+          int daysRemaining = 3 - streak;
+          if (streak >= 3 && streak < 7) {
+            nextMilestoneName = '7 Days Strong';
+            daysRemaining = 7 - streak;
+          } else if (streak >= 7 && streak < 14) {
+            nextMilestoneName = '14 Days Strong';
+            daysRemaining = 14 - streak;
+          } else if (streak >= 14 && streak < 30) {
+            nextMilestoneName = '30 Days Strong';
+            daysRemaining = 30 - streak;
+          } else if (streak >= 30 && streak < 60) {
+            nextMilestoneName = '60 Days Strong';
+            daysRemaining = 60 - streak;
+          } else if (streak >= 60 && streak < 90) {
+            nextMilestoneName = '90 Days Strong';
+            daysRemaining = 90 - streak;
+          } else if (streak >= 90) {
+            nextMilestoneName = '120 Days Strong';
+            daysRemaining = 120 - streak;
+          }
 
           // SOS Card explicit colors to prevent low-contrast fallback bugs
           final Color sosBg = isDark
@@ -302,12 +331,6 @@ class DashboardScreen extends ConsumerWidget {
 
           final Color sosBtnText = Colors.white;
 
-          // Split greeting for rich typography styling
-          final String greetingText = _getGreetingMessage(user.email);
-          final parts = greetingText.split(', ');
-          final String greetingPrefix = parts.first;
-          final String namePart = parts.length > 1 ? parts.last : 'Friend';
-
           // Trigger shield check and review prompt after build completes
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ref.read(dashboardControllerProvider.notifier).checkAndRefillShields();
@@ -331,34 +354,28 @@ class DashboardScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // 1. Welcome Greeting Header
+                  // 1. Welcome Greeting Header (Calm/Stoic Warm greeting style)
                   Padding(
-                    padding: const EdgeInsets.only(left: 4.0, bottom: 24.0, top: 4.0),
+                    padding: const EdgeInsets.only(left: 4.0, bottom: 28.0, top: 4.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: '$greetingPrefix,\n',
-                                style: theme.textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.w300,
-                                  color: theme.colorScheme.onSurface.withAlpha(179),
-                                  letterSpacing: -0.5,
-                                  height: 1.2,
-                                ),
-                              ),
-                              TextSpan(
-                                text: namePart,
-                                style: theme.textTheme.headlineLarge?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                  color: theme.colorScheme.primary,
-                                  letterSpacing: -1.0,
-                                  height: 1.2,
-                                ),
-                              ),
-                            ],
+                        Text(
+                          '$greetingPrefix 👋',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w300,
+                            color: theme.colorScheme.onSurface.withAlpha(179),
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          namePart,
+                          style: theme.textTheme.headlineLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: theme.colorScheme.primary,
+                            letterSpacing: -1.0,
+                            height: 1.1,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -373,7 +390,7 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  // 2. Hero Circular Gauge Card
+                  // 2. Hero Progress Ring & Recovery Card Container
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
@@ -402,15 +419,15 @@ class DashboardScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 36.0, horizontal: 24.0),
                       child: Column(
                         children: [
-                          // Circular Meter
+                          // Gigantic Circular Progress Ring (Instantly noticeable)
                           Center(
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                // Outer Glow Ring or Background Track
+                                // Outer Glow Ring Track
                                 SizedBox(
-                                  width: 190,
-                                  height: 190,
+                                  width: 200,
+                                  height: 200,
                                   child: CircularProgressIndicator(
                                     value: 1.0,
                                     strokeWidth: 10,
@@ -419,8 +436,8 @@ class DashboardScreen extends ConsumerWidget {
                                 ),
                                 // Outer Active Progress Ring
                                 SizedBox(
-                                  width: 190,
-                                  height: 190,
+                                  width: 200,
+                                  height: 200,
                                   child: CircularProgressIndicator(
                                     value: recoveryScore / 100.0,
                                     strokeWidth: 10,
@@ -428,15 +445,15 @@ class DashboardScreen extends ConsumerWidget {
                                     strokeCap: StrokeCap.round,
                                   ),
                                 ),
-                                // Inner Content (Streak Days)
+                                // Inner Content (Giant Streak Counter)
                                 Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
                                       '$streak',
                                       style: theme.textTheme.displayLarge?.copyWith(
-                                        fontSize: 72,
-                                        fontWeight: FontWeight.w200,
+                                        fontSize: 84, // Significantly larger
+                                        fontWeight: FontWeight.w200, // Thin premium weight
                                         color: theme.colorScheme.primary,
                                         letterSpacing: -2,
                                         height: 1.0,
@@ -527,6 +544,58 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 20),
 
+                          // Dynamic Next Milestone Card (motivating visual support)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest.withAlpha(51),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: theme.colorScheme.outline.withAlpha(15),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.stars_rounded, color: Colors.amber, size: 20),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'NEXT MILESTONE',
+                                        style: theme.textTheme.labelSmall?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          color: theme.colorScheme.secondary.withAlpha(180),
+                                          letterSpacing: 1.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        nextMilestoneName,
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: theme.colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  daysRemaining > 0 
+                                      ? '$daysRemaining ${daysRemaining == 1 ? 'day' : 'days'} left'
+                                      : 'Unlocked!',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
                           // Explanation Text
                           Text(
                             '60% No Contact Streak • 40% Mood Check-ins',
@@ -608,7 +677,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // 3. Daily Mood Check-In Card
+                  // 3. Daily Mood Check-In Card (Stoic style selector)
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
@@ -721,7 +790,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // 4. Daily Healing Goals Card
+                  // 4. Daily Healing Goals Card (Polished task checklist)
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
@@ -781,7 +850,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // 5. Journal Notes Card (Write to Heal)
+                  // 5. Journal Notes Card (Write to Heal Card)
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
@@ -856,7 +925,7 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // 6. SOS Safety Net Card (Emergency)
+                  // 6. SOS Safety Net Card (Emergency Sanctuary Card)
                   Container(
                     decoration: BoxDecoration(
                       color: sosBg,
