@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:move_on/utils/recovery_calculator.dart';
 import 'package:move_on/features/mood/domain/mood_entry.dart';
+import 'package:move_on/features/letters/domain/unsent_letter.dart';
 
 void main() {
   group('RecoveryCalculator Tests', () {
@@ -59,6 +60,42 @@ void main() {
       expect(RecoveryCalculator.getStage(50), 'Healing');
       expect(RecoveryCalculator.getStage(70), 'Growth');
       expect(RecoveryCalculator.getStage(90), 'Move-On');
+    });
+  });
+
+  group('UnsentLetter Tests', () {
+    test('isCurrentlyLocked returns correct states', () {
+      final activeLetter = UnsentLetter(
+        id: '1',
+        title: 'Active Draft',
+        content: 'I miss you',
+        category: 'Love',
+        status: 'draft',
+        createdAt: DateTime.now(),
+      );
+      expect(activeLetter.isCurrentlyLocked, false);
+
+      final lockedLetter = UnsentLetter(
+        id: '2',
+        title: 'Locked Letter',
+        content: 'Angry notes',
+        category: 'Anger',
+        status: 'locked',
+        createdAt: DateTime.now(),
+        lockUntil: DateTime.now().add(const Duration(days: 30)),
+      );
+      expect(lockedLetter.isCurrentlyLocked, true);
+
+      final expiredLockedLetter = UnsentLetter(
+        id: '3',
+        title: 'Expired Locked Letter',
+        content: 'Anger notes',
+        category: 'Anger',
+        status: 'locked',
+        createdAt: DateTime.now(),
+        lockUntil: DateTime.now().subtract(const Duration(days: 1)),
+      );
+      expect(expiredLockedLetter.isCurrentlyLocked, false);
     });
   });
 }

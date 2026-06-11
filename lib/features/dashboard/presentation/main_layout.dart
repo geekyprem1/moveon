@@ -5,6 +5,7 @@ import '../../../providers/providers.dart';
 import '../../analytics/data/achievement_service.dart';
 import '../../analytics/presentation/profile_stats_screen.dart';
 import '../../journal/presentation/journal_list_screen.dart';
+import '../../letters/presentation/letters_list_screen.dart';
 import 'dashboard_screen.dart';
 
 class MainLayout extends ConsumerStatefulWidget {
@@ -39,6 +40,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     final List<Widget> screens = const [
       DashboardScreen(),
       JournalListScreen(),
+      LettersListScreen(),
       ProfileStatsScreen(),
     ];
 
@@ -62,6 +64,11 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
             icon: Icon(Icons.book_outlined),
             selectedIcon: Icon(Icons.book),
             label: 'Journals',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.mail_outline),
+            selectedIcon: Icon(Icons.mail),
+            label: 'Letters',
           ),
           NavigationDestination(
             icon: Icon(Icons.analytics_outlined),

@@ -35,10 +35,6 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
           'Journal Notes',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
-        ),
         actions: [
           if (user != null)
             IconButton(

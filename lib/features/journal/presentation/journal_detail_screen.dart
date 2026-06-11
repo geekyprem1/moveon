@@ -43,7 +43,8 @@ class _JournalDetailScreenState extends ConsumerState<JournalDetailScreen> {
       });
     } catch (_) {
       // Entry not found, exit screen
-      context.go('/journal');
+      ref.read(activeTabProvider.notifier).state = 1;
+      context.go('/');
     }
   }
 
@@ -76,7 +77,8 @@ class _JournalDetailScreenState extends ConsumerState<JournalDetailScreen> {
     if (!mounted) return;
 
     if (success) {
-      context.go('/journal');
+      ref.read(activeTabProvider.notifier).state = 1;
+      context.go('/');
     } else {
       final state = ref.read(journalControllerProvider);
       String errorMsg = 'Failed to save entry';
@@ -124,7 +126,8 @@ class _JournalDetailScreenState extends ConsumerState<JournalDetailScreen> {
     if (!mounted) return;
 
     if (success) {
-      context.go('/journal');
+      ref.read(activeTabProvider.notifier).state = 1;
+      context.go('/');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

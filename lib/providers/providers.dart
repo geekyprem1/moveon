@@ -12,6 +12,11 @@ import '../features/journal/domain/journal_entry.dart';
 import '../features/tasks/data/tasks_repository.dart';
 import '../features/notifications/data/notification_service.dart';
 import '../features/analytics/data/analytics_service.dart';
+import '../features/letters/data/letters_repository.dart';
+import '../features/letters/domain/unsent_letter.dart';
+import '../features/emergency/data/emergency_repository.dart';
+import '../features/emergency/domain/emergency_click.dart';
+import '../features/emergency/domain/sos_completion.dart';
 import '../utils/date_formatter.dart';
 
 // ==========================================
@@ -62,6 +67,16 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 
 final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
   return AnalyticsService();
+});
+
+final lettersRepositoryProvider = Provider<LettersRepository>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return LettersRepository(firestore: firestore);
+});
+
+final emergencyRepositoryProvider = Provider<EmergencyRepository>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return EmergencyRepository(firestore: firestore);
 });
 
 // ==========================================
@@ -128,6 +143,44 @@ final completedTasksCountProvider = FutureProvider<int>((ref) async {
       .count()
       .get();
   return snapshot.count ?? 0;
+});
+
+/// Unsent Letters Streams
+final activeLettersProvider = StreamProvider<List<UnsentLetter>>((ref) {
+  final appUser = ref.watch(appUserProvider).value;
+  if (appUser == null) return Stream.value([]);
+  final repo = ref.watch(lettersRepositoryProvider);
+  return repo.watchActiveLetters(appUser.uid);
+});
+
+final lockedLettersProvider = StreamProvider<List<UnsentLetter>>((ref) {
+  final appUser = ref.watch(appUserProvider).value;
+  if (appUser == null) return Stream.value([]);
+  final repo = ref.watch(lettersRepositoryProvider);
+  return repo.watchLockedLetters(appUser.uid);
+});
+
+final burntLettersProvider = StreamProvider<List<UnsentLetter>>((ref) {
+  final appUser = ref.watch(appUserProvider).value;
+  if (appUser == null) return Stream.value([]);
+  final repo = ref.watch(lettersRepositoryProvider);
+  return repo.watchBurntLetters(appUser.uid);
+});
+
+/// Emergency Clicks Stream (for Craving Heatmap)
+final emergencyClicksProvider = StreamProvider<List<EmergencyClick>>((ref) {
+  final appUser = ref.watch(appUserProvider).value;
+  if (appUser == null) return Stream.value([]);
+  final repo = ref.watch(emergencyRepositoryProvider);
+  return repo.watchEmergencyClicks(appUser.uid);
+});
+
+/// SOS Completions Stream
+final sosCompletionsProvider = StreamProvider<List<SosCompletion>>((ref) {
+  final appUser = ref.watch(appUserProvider).value;
+  if (appUser == null) return Stream.value([]);
+  final repo = ref.watch(emergencyRepositoryProvider);
+  return repo.watchSosCompletions(appUser.uid);
 });
 
 final activeTabProvider = StateProvider<int>((ref) {
