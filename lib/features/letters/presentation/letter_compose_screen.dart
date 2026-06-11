@@ -212,8 +212,12 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                 burntAt: DateTime.now(),
               );
 
-              // Save to Firestore
-              await ref.read(lettersRepositoryProvider).saveLetter(user.uid, letter);
+              try {
+                // Save to Firestore
+                await ref.read(lettersRepositoryProvider).saveLetter(user.uid, letter);
+              } catch (e) {
+                debugPrint('Error syncing burnt letter to cloud: $e');
+              }
             }
             navigator.pop(); // Pop Burning Screen
             navigator.pop(); // Pop Compose Screen

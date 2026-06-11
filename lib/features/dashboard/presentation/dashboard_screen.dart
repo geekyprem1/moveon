@@ -239,6 +239,20 @@ class DashboardScreen extends ConsumerWidget {
 
     final theme = Theme.of(context);
 
+    // Listen to dashboard state errors
+    ref.listen<AsyncValue<void>>(dashboardControllerProvider, (previous, next) {
+      next.whenOrNull(
+        error: (error, stackTrace) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error.toString().replaceAll(RegExp(r'\[.*?\]'), '').trim()),
+              backgroundColor: theme.colorScheme.error,
+            ),
+          );
+        },
+      );
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(

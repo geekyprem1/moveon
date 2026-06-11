@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'auth_controller.dart';
+import 'legal_screens.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -194,6 +195,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       TextButton(
                         onPressed: isLoading ? null : () => context.go('/signup'),
                         child: const Text('Sign Up'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: [
+                      Text(
+                        'By logging in, you agree to our ',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(150),
+                            ),
+                      ),
+                      GestureDetector(
+                        onTap: () => LegalScreens.showTermsOfService(context),
+                        child: Text(
+                          'Terms of Service',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                              ),
+                        ),
+                      ),
+                      Text(
+                        ' and ',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withAlpha(150),
+                            ),
+                      ),
+                      GestureDetector(
+                        onTap: () => LegalScreens.showPrivacyPolicy(context),
+                        child: Text(
+                          'Privacy Policy',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                              ),
+                        ),
                       ),
                     ],
                   ),

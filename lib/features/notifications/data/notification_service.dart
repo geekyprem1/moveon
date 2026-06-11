@@ -127,7 +127,7 @@ class NotificationService {
       'Take a moment to check in with your emotions.',
       _nextInstanceOfTime(20, 0),
       platformDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -140,7 +140,7 @@ class NotificationService {
       'Completing small goals builds your streak and helps you recover.',
       _nextInstanceOfTime(9, 0),
       platformDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -179,7 +179,7 @@ class NotificationService {
         'Take a moment to record your mood and maintain your streak.',
         now.add(const Duration(hours: 24)),
         platformDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
 
@@ -190,7 +190,7 @@ class NotificationService {
         'It has been 3 days. Reconnect with your healing path.',
         now.add(const Duration(hours: 72)),
         platformDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
 
@@ -201,7 +201,7 @@ class NotificationService {
         'A week of progress awaits. Let\'s review your insights.',
         now.add(const Duration(days: 7)),
         platformDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       );
     } catch (_) {}
