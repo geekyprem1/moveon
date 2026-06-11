@@ -269,6 +269,39 @@ class DashboardScreen extends ConsumerWidget {
           );
           final String todayMood = todayMoodEntry.mood;
 
+          final bool isDark = theme.brightness == Brightness.dark;
+
+          // SOS Card explicit colors to prevent low-contrast fallback bugs
+          final Color sosBg = isDark
+              ? const Color(0xFF2C1E21) // deep dark warm brown/red
+              : const Color(0xFFFFF5F3); // soft warm peach
+
+          final Color sosBorder = isDark
+              ? const Color(0xFF5C3F43) // dark warm red border
+              : const Color(0xFFF9DEDC); // light warm red border
+
+          final Color sosTitle = isDark
+              ? const Color(0xFFFFB4AB) // light warm red
+              : const Color(0xFF601410); // deep warm burgundy
+
+          final Color sosDesc = isDark
+              ? const Color(0xFFFFDAD6) // soft peach-white
+              : const Color(0xFF801815); // rich dark red
+
+          final Color sosIconBg = isDark
+              ? const Color(0xFF442B2D)
+              : const Color(0xFFF9DEDC);
+
+          final Color sosIconColor = isDark
+              ? const Color(0xFFFFB4AB)
+              : const Color(0xFFB3261E);
+
+          final Color sosBtnBg = isDark
+              ? const Color(0xFFB3261E) // red button
+              : const Color(0xFFB3261E);
+
+          final Color sosBtnText = Colors.white;
+
           // Split greeting for rich typography styling
           final String greetingText = _getGreetingMessage(user.email);
           final parts = greetingText.split(', ');
@@ -826,27 +859,15 @@ class DashboardScreen extends ConsumerWidget {
                   // 6. SOS Safety Net Card (Emergency)
                   Container(
                     decoration: BoxDecoration(
+                      color: sosBg,
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: theme.colorScheme.error.withAlpha(31),
+                        color: sosBorder,
                         width: 1,
-                      ),
-                      gradient: LinearGradient(
-                        colors: theme.brightness == Brightness.dark
-                            ? [
-                                theme.colorScheme.errorContainer.withAlpha(20),
-                                theme.colorScheme.errorContainer.withAlpha(8),
-                              ]
-                            : [
-                                const Color(0xFFFFF8F6),
-                                const Color(0xFFFFF1EE),
-                              ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.colorScheme.error.withAlpha(5),
+                          color: Colors.black.withAlpha(5),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
@@ -862,12 +883,12 @@ class DashboardScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.errorContainer.withAlpha(153),
+                                  color: sosIconBg,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   Icons.heart_broken_rounded,
-                                  color: theme.colorScheme.onErrorContainer,
+                                  color: sosIconColor,
                                   size: 20,
                                 ),
                               ),
@@ -877,7 +898,7 @@ class DashboardScreen extends ConsumerWidget {
                                   'Urge to contact your ex? 🆘',
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w800,
-                                    color: theme.colorScheme.onErrorContainer,
+                                    color: sosTitle,
                                     fontSize: 16,
                                     letterSpacing: -0.1,
                                   ),
@@ -889,7 +910,7 @@ class DashboardScreen extends ConsumerWidget {
                           Text(
                             'Before you text or call, take a pause. We have exercises, breathing guides, and delay timers ready to help you hold boundaries.',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onErrorContainer.withAlpha(204),
+                              color: sosDesc,
                               fontSize: 13,
                               height: 1.4,
                             ),
@@ -905,14 +926,14 @@ class DashboardScreen extends ConsumerWidget {
                                 recoveryScore,
                               );
                             },
-                            icon: const Icon(Icons.favorite_rounded, size: 16),
+                            icon: Icon(Icons.favorite_rounded, size: 16, color: sosBtnText),
                             label: const Text(
                               'Open Emergency Toolkit',
                               style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.1),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.errorContainer,
-                              foregroundColor: theme.colorScheme.onErrorContainer,
+                              backgroundColor: sosBtnBg,
+                              foregroundColor: sosBtnText,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
