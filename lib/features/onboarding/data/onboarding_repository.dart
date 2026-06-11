@@ -9,6 +9,7 @@ class OnboardingRepository {
   /// Submits the onboarding data to Firestore
   Future<void> submitOnboarding({
     required String uid,
+    required String name,
     required DateTime breakupDate,
     required int relationshipDurationDays,
     required int initialPainScore,
@@ -16,6 +17,7 @@ class OnboardingRepository {
   }) async {
     final Map<String, dynamic> data = {
       'onboarded': true,
+      'name': name,
       'breakupDate': Timestamp.fromDate(breakupDate),
       'relationshipDurationDays': relationshipDurationDays,
       'initialPainScore': initialPainScore,

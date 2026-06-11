@@ -15,6 +15,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _formKeyStep2 = GlobalKey<FormState>();
 
   int _currentPage = 0;
+  final _nameController = TextEditingController();
   DateTime _breakupDate = DateTime.now().subtract(const Duration(days: 1));
   final _yearsController = TextEditingController(text: '0');
   final _monthsController = TextEditingController(text: '0');
@@ -33,6 +34,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   void dispose() {
     _pageController.dispose();
+    _nameController.dispose();
     _yearsController.dispose();
     _monthsController.dispose();
     super.dispose();
@@ -65,7 +67,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _nextPage() {
-    if (_currentPage == 2) {
+    if (_currentPage == 0) {
+      if (_nameController.text.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please share a name or nickname so we can welcome you.')),
+        );
+        return;
+      }
+    }
+    if (_currentPage == 3) {
       // Validate Step 2 inputs
       if (!_formKeyStep2.currentState!.validate()) return;
       final years = int.tryParse(_yearsController.text) ?? 0;
@@ -99,6 +109,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     final controller = ref.read(onboardingControllerProvider.notifier);
     final success = await controller.submitOnboarding(
+      name: _nameController.text.trim(),
       breakupDate: _breakupDate,
       relationshipDurationDays: totalDays,
       initialPainScore: _painScore.toInt(),
@@ -144,7 +155,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
                 child: LinearProgressIndicator(
-                  value: (_currentPage + 1) / 6.0,
+                  value: (_currentPage + 1) / 7.0,
                   minHeight: 8.0,
                   backgroundColor: theme.colorScheme.surfaceContainerHighest,
                   color: theme.colorScheme.primary,
@@ -157,14 +168,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Step ${_currentPage + 1} of 6',
+                    'Step ${_currentPage + 1} of 7',
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: theme.colorScheme.secondary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    '${((_currentPage + 1) / 6.0 * 100).toInt()}% Complete',
+                    '${((_currentPage + 1) / 7.0 * 100).toInt()}% Complete',
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -186,6 +197,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   });
                 },
                 children: [
+                  _buildNameStep(theme),
                   _buildIntroNoContact(theme),
                   _buildStep1(theme),
                   _buildStep2(theme),
@@ -219,7 +231,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ElevatedButton(
                     onPressed: isLoading
                         ? null
-                        : _currentPage < 5
+                        : _currentPage < 6
                             ? _nextPage
                             : _submit,
                     style: ElevatedButton.styleFrom(
@@ -240,7 +252,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             ),
                           )
                         : Text(
-                            _currentPage < 5 ? 'Next' : 'Begin Journey',
+                            _currentPage < 6 ? 'Next' : 'Begin Journey',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                   ),
@@ -249,6 +261,56 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // NEW STEP 0: Warm Name Input
+  Widget _buildNameStep(ThemeData theme) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          const Text(
+            '🌱',
+            style: TextStyle(fontSize: 48),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Who are we walking with today?',
+            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Heartbreak is a heavy load to carry alone. We are here to walk this path with you. What should we call you? Use a name or nickname that feels safe.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.secondary,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 32),
+          TextFormField(
+            controller: _nameController,
+            textCapitalization: TextCapitalization.words,
+            maxLength: 30,
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            decoration: InputDecoration(
+              hintText: 'Enter your name or safe nickname',
+              labelText: 'Your Name',
+              counterText: '',
+              prefixIcon: Icon(Icons.favorite, color: theme.colorScheme.primary.withAlpha(180)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

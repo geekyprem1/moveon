@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class AppUser {
   final String uid;
   final String email;
+  final String? name;
   final bool onboarded;
   final DateTime? breakupDate;
   final int? relationshipDurationDays;
@@ -23,6 +24,7 @@ class AppUser {
   AppUser({
     required this.uid,
     required this.email,
+    this.name,
     this.onboarded = false,
     this.breakupDate,
     this.relationshipDurationDays,
@@ -63,6 +65,7 @@ class AppUser {
   AppUser copyWith({
     String? uid,
     String? email,
+    String? name,
     bool? onboarded,
     DateTime? breakupDate,
     int? relationshipDurationDays,
@@ -83,6 +86,7 @@ class AppUser {
     return AppUser(
       uid: uid ?? this.uid,
       email: email ?? this.email,
+      name: name ?? this.name,
       onboarded: onboarded ?? this.onboarded,
       breakupDate: breakupDate ?? this.breakupDate,
       relationshipDurationDays: relationshipDurationDays ?? this.relationshipDurationDays,
@@ -106,6 +110,7 @@ class AppUser {
     return {
       'uid': uid,
       'email': email,
+      'name': name,
       'onboarded': onboarded,
       'breakupDate': breakupDate != null ? Timestamp.fromDate(breakupDate!) : null,
       'relationshipDurationDays': relationshipDurationDays,
@@ -167,6 +172,7 @@ class AppUser {
     return AppUser(
       uid: uidStr,
       email: json['email'] as String? ?? '',
+      name: json['name'] as String?,
       onboarded: json['onboarded'] as bool? ?? false,
       breakupDate: bDate,
       relationshipDurationDays: json['relationshipDurationDays'] as int?,

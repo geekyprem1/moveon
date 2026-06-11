@@ -7,6 +7,7 @@ class OnboardingController extends StateNotifier<AsyncValue<void>> {
   OnboardingController(this._ref) : super(const AsyncValue.data(null));
 
   Future<bool> submitOnboarding({
+    required String name,
     required DateTime breakupDate,
     required int relationshipDurationDays,
     required int initialPainScore,
@@ -24,6 +25,7 @@ class OnboardingController extends StateNotifier<AsyncValue<void>> {
       final onboardingRepo = _ref.read(onboardingRepositoryProvider);
       await onboardingRepo.submitOnboarding(
         uid: uid,
+        name: name,
         breakupDate: breakupDate,
         relationshipDurationDays: relationshipDurationDays,
         initialPainScore: initialPainScore,

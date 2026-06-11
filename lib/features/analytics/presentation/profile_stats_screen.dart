@@ -135,12 +135,22 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            user.email,
+                            user.name ?? user.email,
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
-                              fontSize: 16,
+                              fontSize: 18,
                             ),
                           ),
+                          if (user.name != null && user.name!.trim().isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              user.email,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.secondary.withAlpha(180),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 4),
                           Text(
                             'Breakup Type: ${user.breakupType ?? 'N/A'}',
