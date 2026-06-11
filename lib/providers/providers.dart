@@ -11,6 +11,7 @@ import '../features/journal/data/journal_repository.dart';
 import '../features/journal/domain/journal_entry.dart';
 import '../features/tasks/data/tasks_repository.dart';
 import '../features/notifications/data/notification_service.dart';
+import '../features/analytics/data/analytics_service.dart';
 import '../utils/date_formatter.dart';
 
 // ==========================================
@@ -57,6 +58,10 @@ final tasksRepositoryProvider = Provider<TasksRepository>((ref) {
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService();
+});
+
+final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
+  return AnalyticsService();
 });
 
 // ==========================================
@@ -109,4 +114,22 @@ final dailyCompletedTasksProvider = StreamProvider<Set<String>>((ref) {
   final tasksRepo = ref.watch(tasksRepositoryProvider);
   final String todayStr = DateFormatter.toDateString(DateTime.now());
   return tasksRepo.watchCompletedTasks(appUser.uid, todayStr);
+});
+
+/// Fetch count of all tasks documents using count() aggregation
+final completedTasksCountProvider = FutureProvider<int>((ref) async {
+  final appUser = ref.watch(appUserProvider).value;
+  if (appUser == null) return 0;
+  final firestore = ref.read(firestoreProvider);
+  final snapshot = await firestore
+      .collection('users')
+      .doc(appUser.uid)
+      .collection('tasks')
+      .count()
+      .get();
+  return snapshot.count ?? 0;
+});
+
+final activeTabProvider = StateProvider<int>((ref) {
+  return 0; // Default to Dashboard (index 0)
 });

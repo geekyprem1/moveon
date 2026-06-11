@@ -29,6 +29,10 @@ class JournalController extends StateNotifier<AsyncValue<void>> {
 
       final repo = _ref.read(journalRepositoryProvider);
       await repo.saveJournal(user.uid, entry);
+
+      // Log Analytics Event
+      _ref.read(analyticsServiceProvider).logJournalCreated();
+
       state = const AsyncValue.data(null);
       return true;
     } catch (e, st) {

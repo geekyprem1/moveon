@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../constants/app_colors.dart';
 import '../../../constants/app_tasks.dart';
@@ -353,7 +352,7 @@ class DashboardScreen extends ConsumerWidget {
                       // Journal Button
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () => context.go('/journal'),
+                          onPressed: () => ref.read(activeTabProvider.notifier).state = 1,
                           icon: const Icon(Icons.book_outlined),
                           label: const Text('Journal Notes'),
                           style: ElevatedButton.styleFrom(
@@ -370,12 +369,15 @@ class DashboardScreen extends ConsumerWidget {
                       // Emergency Button
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () => _showEmergencySupport(
-                            context,
-                            ref,
-                            streak,
-                            recoveryScore,
-                          ),
+                          onPressed: () {
+                            ref.read(analyticsServiceProvider).logEmergencyClicked();
+                            _showEmergencySupport(
+                              context,
+                              ref,
+                              streak,
+                              recoveryScore,
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             backgroundColor: theme.colorScheme.errorContainer,

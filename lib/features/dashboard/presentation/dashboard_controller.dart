@@ -25,6 +25,10 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
 
       final moodRepo = _ref.read(moodRepositoryProvider);
       await moodRepo.logMood(user.uid, entry);
+
+      // Log Analytics Event
+      _ref.read(analyticsServiceProvider).logMoodCheckIn(moodName);
+
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -40,6 +44,11 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       final tasksRepo = _ref.read(tasksRepositoryProvider);
       final dateStr = DateFormatter.toDateString(DateTime.now());
       await tasksRepo.toggleTask(user.uid, dateStr, taskId, completed);
+
+      // Log Analytics Event if task completed
+      if (completed) {
+        _ref.read(analyticsServiceProvider).logTaskCompleted(taskId);
+      }
     } catch (_) {
       // Fail silently for task toggling (optimistic UX)
     }

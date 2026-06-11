@@ -67,4 +67,24 @@ class RecoveryCalculator {
     final double total = streakContribution + moodContribution;
     return total > 100.0 ? 100.0 : (total < 0.0 ? 0.0 : total);
   }
+
+  /// Calculate mood improvement percentage relative to starting pain score
+  static double calculateMoodImprovement(List<MoodEntry> recentMoods, int initialPainScore) {
+    if (recentMoods.isEmpty) return 0.0;
+
+    // Convert pain score (0-10) to wellness rating (0-10)
+    final double initialWellness = (10 - initialPainScore).toDouble();
+
+    // Map current mood score average (0-100) to wellness rating (0-10)
+    final double currentMoodScore = calculateMoodScore(recentMoods);
+    final double currentWellness = currentMoodScore / 10.0;
+
+    if (initialWellness <= 0.0) {
+      // If starting wellness was 0, calculate relative to 10
+      return (currentWellness / 10.0) * 100.0;
+    }
+
+    final double improvement = ((currentWellness - initialWellness) / initialWellness) * 100.0;
+    return improvement;
+  }
 }

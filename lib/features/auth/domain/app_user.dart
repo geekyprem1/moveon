@@ -9,6 +9,8 @@ class AppUser {
   final int? initialPainScore;
   final String? breakupType;
   final DateTime? lastContactDate;
+  final int longestStreak;
+  final List<String> unlockedAchievements;
 
   AppUser({
     required this.uid,
@@ -19,6 +21,8 @@ class AppUser {
     this.initialPainScore,
     this.breakupType,
     this.lastContactDate,
+    this.longestStreak = 0,
+    this.unlockedAchievements = const [],
   });
 
   /// Calculate streak in full days based on lastContactDate
@@ -47,6 +51,8 @@ class AppUser {
     int? initialPainScore,
     String? breakupType,
     DateTime? lastContactDate,
+    int? longestStreak,
+    List<String>? unlockedAchievements,
   }) {
     return AppUser(
       uid: uid ?? this.uid,
@@ -57,6 +63,8 @@ class AppUser {
       initialPainScore: initialPainScore ?? this.initialPainScore,
       breakupType: breakupType ?? this.breakupType,
       lastContactDate: lastContactDate ?? this.lastContactDate,
+      longestStreak: longestStreak ?? this.longestStreak,
+      unlockedAchievements: unlockedAchievements ?? this.unlockedAchievements,
     );
   }
 
@@ -70,6 +78,8 @@ class AppUser {
       'initialPainScore': initialPainScore,
       'breakupType': breakupType,
       'lastContactDate': lastContactDate != null ? Timestamp.fromDate(lastContactDate!) : null,
+      'longestStreak': longestStreak,
+      'unlockedAchievements': unlockedAchievements,
     };
   }
 
@@ -98,6 +108,11 @@ class AppUser {
       initialPainScore: json['initialPainScore'] as int?,
       breakupType: json['breakupType'] as String?,
       lastContactDate: cDate ?? bDate, // Default last contact to breakup date
+      longestStreak: json['longestStreak'] as int? ?? 0,
+      unlockedAchievements: (json['unlockedAchievements'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
     );
   }
 }
