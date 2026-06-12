@@ -23,10 +23,11 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
 
   // Rotating Input Placeholders
   final List<String> _placeholders = [
-    "Share what's on your mind...",
     "Tell me what's hurting today...",
-    "What's been hardest today?",
+    "What's weighing on your heart?",
     "I'm listening...",
+    "Share what's on your mind...",
+    "What feels hardest today?",
   ];
   int _placeholderIndex = 0;
   Timer? _placeholderTimer;
@@ -205,6 +206,93 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
     }
     
     return emotionalGreetings[dayOfYear % emotionalGreetings.length];
+  }
+
+  bool _isSosPhrase(String text) {
+    final cleanText = text.toLowerCase().trim();
+    final sosPhrases = [
+      "want to text them",
+      "want to text her",
+      "want to text him",
+      "want to call them",
+      "want to call her",
+      "want to call him",
+      "miss them too much",
+      "miss her too much",
+      "miss him too much",
+      "contact them",
+      "contact her",
+      "contact him",
+      "reach out to them",
+      "reach out to her",
+      "reach out to him",
+      "call my ex",
+      "text my ex",
+    ];
+    return sosPhrases.any((phrase) => cleanText.contains(phrase));
+  }
+
+  void _showSosConfirmationDialog(BuildContext context, String originalText, List<CoachMessage> history) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          backgroundColor: theme.colorScheme.surface,
+          title: Row(
+            children: [
+              const Icon(Icons.shield_outlined, color: Color(0xFFC76D6A)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  "Take a Mindful Pause",
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            "It sounds like you're experiencing a strong urge to reach out. Let's take a pause together. Would you like to enter SOS Mode to ride out this urge?",
+            style: TextStyle(height: 1.45),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                // Proceed with normal chat send
+                _sendMessageDirectly(originalText, history);
+              },
+              child: Text(
+                "No, just talk",
+                style: TextStyle(
+                  color: theme.colorScheme.secondary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                // Trigger SOS session
+                ref.read(coachControllerProvider.notifier).startNewSession('SOS');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFC76D6A),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              child: const Text(
+                "Yes, enter SOS",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -405,8 +493,12 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
                         return ListView.builder(
                           controller: _scrollController,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          itemCount: messages.length,
+                          itemCount: messages.length + 1, // Add emotional reinforcement footer
                           itemBuilder: (context, index) {
+                            if (index == messages.length) {
+                              return _buildEmotionalReinforcementFooter(theme);
+                            }
+                            
                             final msg = messages[index];
                             final isUser = msg.role == 'user';
                             return _AnimatedMessageBubble(
@@ -495,7 +587,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
           const SizedBox(height: 32),
           
           // 2. Healing Breathing Orb
-          HealingOrb(isMini: false, isTyping: false),
+          const HealingOrb(isMini: false, isTyping: false),
           
           const SizedBox(height: 20),
           
@@ -545,7 +637,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
                     } else {
                       ref.read(hapticServiceProvider).selection();
                       final promptText = chip['prompt'] as String;
-                      _sendMessage(promptText, []);
+                      _sendMessageDirectly(promptText, []);
                     }
                   },
                 );
@@ -553,6 +645,45 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
             ),
           ),
           const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+
+  // Emotional Reinforcement Footer
+  Widget _buildEmotionalReinforcementFooter(ThemeData theme) {
+    final dayOfYear = DateTime.now().difference(DateTime(DateTime.now().year, 1, 1)).inDays;
+    final reinforcements = [
+      "You showed up for yourself today.",
+      "You resisted the urge. That matters.",
+      "Progress isn't always visible.",
+      "Small steps still count.",
+      "Every moment of peace is a step forward.",
+      "Be gentle with your healing heart."
+    ];
+    final text = reinforcements[dayOfYear % reinforcements.length];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Icon(
+            Icons.spa_outlined,
+            size: 16,
+            color: theme.colorScheme.primary.withValues(alpha: 0.4),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: theme.colorScheme.secondary.withValues(alpha: 0.55),
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -659,57 +790,113 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
     );
   }
 
-  // Premium Chat Message Bubble Layout
+  // Premium Chat Message Guidance Card Layout
   Widget _buildMessageBubble(CoachMessage msg, ThemeData theme) {
     final isUser = msg.role == 'user';
     final isDark = theme.brightness == Brightness.dark;
     
-    final bubbleColor = isUser
-        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.85)
-        : (isDark
-            ? theme.colorScheme.surface.withValues(alpha: 0.4)
-            : theme.colorScheme.surface.withValues(alpha: 0.8));
+    if (isUser) {
+      // User bubble remains minimal and clean
+      return Align(
+        alignment: Alignment.centerRight,
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+          constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.12),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(4),
+            ),
+          ),
+          child: Text(
+            msg.content,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              height: 1.45,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // AI messages as elegant Guidance Cards
+    final cardBgGradient = isDark
+        ? const LinearGradient(
+            colors: [Color(0xFF1E1720), Color(0xFF140F15)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
+        : const LinearGradient(
+            colors: [Color(0xFFFFFDFB), Color(0xFFFAF5FA)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          );
 
     return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.all(20),
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.85),
         decoration: BoxDecoration(
-          color: bubbleColor,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(22),
-            topRight: const Radius.circular(22),
-            bottomLeft: Radius.circular(isUser ? 22 : 6),
-            bottomRight: Radius.circular(isUser ? 6 : 22),
+          gradient: cardBgGradient,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+            bottomLeft: Radius.circular(6),
+            bottomRight: Radius.circular(24),
           ),
           border: Border.all(
-            color: isUser
-                ? Colors.transparent
-                : theme.colorScheme.outline.withAlpha(20),
-            width: 0.8,
+            color: const Color(0xFFC76D8A).withValues(alpha: 0.18),
+            width: 1.0,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
+              color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
-        child: Text(
-          msg.content,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            height: 1.5,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Guidance signature tag
+            Row(
+              children: [
+                const Icon(Icons.spa_rounded, color: Color(0xFFC76D8A), size: 14),
+                const SizedBox(width: 6),
+                Text(
+                  "MINDFUL COMPANION",
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFFC76D8A),
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              msg.content,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                height: 1.55, // Larger line height for maximum readability
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                letterSpacing: 0.15,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // Custom Bouncing Dots thought indicator
+  // Shimmering typing indicator
   Widget _buildTypingIndicator(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -725,7 +912,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
             bottomRight: Radius.circular(20),
           ),
           border: Border.all(
-            color: theme.colorScheme.outline.withAlpha(20),
+            color: theme.colorScheme.outline.withValues(alpha: 0.2),
             width: 0.8,
           ),
         ),
@@ -759,7 +946,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
             : theme.colorScheme.surface.withValues(alpha: 0.4),
         border: Border(
           top: BorderSide(
-            color: theme.colorScheme.outline.withAlpha(15),
+            color: theme.colorScheme.outline.withValues(alpha: 0.15),
             width: 0.8,
           ),
         ),
@@ -768,7 +955,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
         top: false,
         child: Row(
           children: [
-            // SOS Quick Action Shortcut Icon
+            // SOS Quick Shortcut
             GestureDetector(
               onTap: () {
                 ref.read(hapticServiceProvider).medium();
@@ -801,7 +988,7 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
                       : theme.colorScheme.surface.withValues(alpha: 0.85),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(26),
-                    borderSide: BorderSide(color: theme.colorScheme.outline.withAlpha(30)),
+                    borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(26),
@@ -839,10 +1026,17 @@ class _CoachScreenState extends ConsumerState<CoachScreen> with TickerProviderSt
   void _sendMessage(String text, List<CoachMessage> history) {
     if (text.trim().isEmpty) return;
     
-    // Light impact for sending
-    ref.read(hapticServiceProvider).light();
+    // Proactive intercept for SOS keywords
+    if (_isSosPhrase(text)) {
+      _showSosConfirmationDialog(context, text.trim(), history);
+    } else {
+      _sendMessageDirectly(text.trim(), history);
+    }
+  }
 
-    ref.read(coachControllerProvider.notifier).sendMessage(text.trim(), history);
+  void _sendMessageDirectly(String text, List<CoachMessage> history) {
+    ref.read(hapticServiceProvider).light();
+    ref.read(coachControllerProvider.notifier).sendMessage(text, history);
     _messageController.clear();
   }
 }
@@ -920,7 +1114,7 @@ class _BouncingDotsState extends State<_BouncingDots> with TickerProviderStateMi
   }
 }
 
-// Animated Scale on Click Quick Action Chips
+// Animated Scale Action Chips
 class _AnimatedActionChip extends StatefulWidget {
   final String label;
   final IconData? icon;
@@ -965,7 +1159,7 @@ class _AnimatedActionChipState extends State<_AnimatedActionChip> {
         border: Border.all(
           color: widget.isSos
               ? Colors.transparent
-              : theme.colorScheme.outline.withAlpha(isDark ? 20 : 40),
+              : theme.colorScheme.outline.withValues(alpha: isDark ? 20 : 40),
           width: 0.8,
         ),
         boxShadow: widget.isSos
@@ -1037,7 +1231,7 @@ class _AnimatedActionChipState extends State<_AnimatedActionChip> {
   }
 }
 
-// Custom Premium Personalization banner
+// Custom Premium Personalization Card
 class _PersonalizationCard extends StatelessWidget {
   final String name;
   final String greetingPrefix;
@@ -1067,7 +1261,7 @@ class _PersonalizationCard extends StatelessWidget {
             ? theme.colorScheme.surface.withValues(alpha: 0.2)
             : theme.colorScheme.surface.withValues(alpha: 0.55),
         border: Border.all(
-          color: theme.colorScheme.outline.withAlpha(isDark ? 15 : 35),
+          color: theme.colorScheme.outline.withValues(alpha: isDark ? 15 : 35),
           width: 0.8,
         ),
         boxShadow: [
@@ -1099,7 +1293,7 @@ class _PersonalizationCard extends StatelessWidget {
                   color: const Color(0xFFC76D8A).withValues(alpha: 0.12),
                 ),
                 child: Text(
-                  "$streak days of space",
+                  "$streak days of choosing yourself",
                   style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
@@ -1144,7 +1338,7 @@ class _PersonalizationCard extends StatelessWidget {
   }
 }
 
-// Fade in slide-up animation for incoming chat bubbles
+// Slide-up fade-in animation for message bubbles
 class _AnimatedMessageBubble extends StatelessWidget {
   final CoachMessage message;
   final bool isUser;

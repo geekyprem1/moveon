@@ -22,13 +22,13 @@ class _HealingOrbState extends State<HealingOrb> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    // 8-second breathing cycle (4s inhale, 4s exhale)
+    // 6-second standard breathing cycle (Inhale 2s, Hold 2s, Exhale 2s)
     _breathingController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 8),
-    )..repeat(reverse: true);
+      duration: const Duration(seconds: 6),
+    )..repeat();
 
-    // Continuous fast morphing cycle
+    // 12-second slow morphing cycle
     _morphController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 12),
@@ -40,14 +40,13 @@ class _HealingOrbState extends State<HealingOrb> with TickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
     if (widget.isTyping != oldWidget.isTyping) {
       if (widget.isTyping) {
-        _breathingController.duration = const Duration(seconds: 3); // Faster breath when typing/active
+        _breathingController.duration = const Duration(seconds: 3); // Faster cycle when active
         _morphController.duration = const Duration(seconds: 4);
       } else {
-        _breathingController.duration = const Duration(seconds: 8);
+        _breathingController.duration = const Duration(seconds: 6);
         _morphController.duration = const Duration(seconds: 12);
       }
-      // Restart with new durations
-      _breathingController.repeat(reverse: true);
+      _breathingController.repeat();
       _morphController.repeat();
     }
   }
@@ -59,8 +58,36 @@ class _HealingOrbState extends State<HealingOrb> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  String get _breathingText {
+    final val = _breathingController.value;
+    if (val < 0.333) {
+      return "Inhale";
+    } else if (val < 0.666) {
+      return "Hold";
+    } else {
+      return "Exhale";
+    }
+  }
+
+  double get _breathingScale {
+    final val = _breathingController.value;
+    if (val < 0.333) {
+      // Scale up from 1.0 to 1.15
+      final progress = val / 0.333;
+      return 1.0 + (progress * 0.15);
+    } else if (val < 0.666) {
+      // Hold at 1.15
+      return 1.15;
+    } else {
+      // Scale down from 1.15 to 1.0
+      final progress = (val - 0.666) / 0.334;
+      return 1.15 - (progress * 0.15);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final size = widget.isMini ? 40.0 : 160.0;
     
     return AnimatedBuilder(
@@ -68,8 +95,8 @@ class _HealingOrbState extends State<HealingOrb> with TickerProviderStateMixin {
       builder: (context, child) {
         // Subtle translation offset to make it "float" bobbing up and down
         final floatOffset = math.sin(_morphController.value * 2 * math.pi) * (widget.isMini ? 2.0 : 8.0);
-        // Breathing scale factor: pulse size slightly
-        final scale = 1.0 + (_breathingController.value * (widget.isMini ? 0.08 : 0.15));
+        // Breathing scale factor driven by Calm-inspired phases
+        final scale = _breathingScale;
 
         return Transform.translate(
           offset: Offset(0, floatOffset),
@@ -113,6 +140,33 @@ class _HealingOrbState extends State<HealingOrb> with TickerProviderStateMixin {
                       isMini: widget.isMini,
                     ),
                   ),
+
+                  // Layer 3: Breathing Text Overlay (only for full-size orb)
+                  if (!widget.isMini)
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          _breathingText,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            color: theme.colorScheme.primary,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          "Breathe",
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            color: theme.colorScheme.secondary.withValues(alpha: 0.65),
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),

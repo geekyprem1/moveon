@@ -6,6 +6,7 @@ import '../../../providers/providers.dart';
 import '../../../utils/haptic_service.dart';
 import '../../journal/domain/journal_entry.dart';
 import 'coach_controller.dart';
+import 'healing_orb.dart';
 
 class SosExperienceView extends ConsumerStatefulWidget {
   final VoidCallback onClose;
@@ -25,12 +26,8 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
   Timer? _pauseTimer;
 
   // Breathing variables (Step 3)
-  late AnimationController _breathingController;
-  late Animation<double> _breathingAnimation;
-  String _breathingText = "Get Ready";
-  int _breathCount = 0;
-  Timer? _breathTimer;
-  int _breathTimerSeconds = 0;
+  int _breathingCountdownSeconds = 60;
+  Timer? _breathingCountdownTimer;
 
   // Input Controllers
   final TextEditingController _reflectionController = TextEditingController();
@@ -41,22 +38,12 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
   @override
   void initState() {
     super.initState();
-    
-    // Set up breathing animation controller
-    _breathingController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    );
-    _breathingAnimation = Tween<double>(begin: 1.0, end: 1.6).animate(
-      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOutSine),
-    );
   }
 
   @override
   void dispose() {
     _pauseTimer?.cancel();
-    _breathTimer?.cancel();
-    _breathingController.dispose();
+    _breathingCountdownTimer?.cancel();
     _reflectionController.dispose();
     _journalController.dispose();
     super.dispose();
@@ -90,53 +77,26 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
         }
       });
     } else if (_currentStep == 2) {
-      // Start breathing exercise
-      _startBreathing();
+      // Start 60-second breathing exercise
+      _startBreathingCountdown();
     }
   }
 
-  void _startBreathing() {
-    _breathCount = 0;
-    _breathingText = "Inhale...";
-    _breathingController.forward();
-    
-    _breathTimerSeconds = 4;
-    _breathTimer?.cancel();
-    _breathTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+  void _startBreathingCountdown() {
+    _breathingCountdownSeconds = 60;
+    _breathingCountdownTimer?.cancel();
+    _breathingCountdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
       
       setState(() {
-        _breathTimerSeconds--;
-        if (_breathTimerSeconds <= 0) {
-          _advanceBreathingPhase();
+        if (_breathingCountdownSeconds > 0) {
+          _breathingCountdownSeconds--;
+        } else {
+          _breathingCountdownTimer?.cancel();
+          _nextStep();
         }
       });
     });
-  }
-
-  void _advanceBreathingPhase() {
-    if (_breathingText == "Inhale...") {
-      _breathingText = "Hold...";
-      _breathTimerSeconds = 4;
-    } else if (_breathingText == "Hold..." && _breathingController.value > 0.5) {
-      _breathingText = "Exhale...";
-      _breathingController.reverse();
-      _breathTimerSeconds = 4;
-    } else if (_breathingText == "Exhale...") {
-      _breathingText = "Hold...";
-      _breathTimerSeconds = 4;
-    } else {
-      _breathCount++;
-      if (_breathCount >= 3) {
-        _breathTimer?.cancel();
-        _breathingController.stop();
-        _nextStep();
-        return;
-      }
-      _breathingText = "Inhale...";
-      _breathingController.forward();
-      _breathTimerSeconds = 4;
-    }
   }
 
   Future<void> _finishSos() async {
@@ -155,7 +115,6 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
           updatedAt: DateTime.now(),
         );
         await ref.read(journalRepositoryProvider).saveJournal(user.uid, entry);
-        // Track journal created locally
         ref.read(analyticsServiceProvider).logJournalCreated();
       }
     }
@@ -163,7 +122,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
     // Save SOS log
     await ref.read(coachControllerProvider.notifier).completeSosLog(
       _reflectionController.text.isNotEmpty ? _reflectionController.text : "No Contact Urge",
-      _breathCount >= 2,
+      true, // Completed breathing
       journalId,
     );
 
@@ -210,7 +169,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
             child: LinearProgressIndicator(
               value: (_currentStep + 1) / (_totalSteps + 1),
               minHeight: 6,
-              backgroundColor: theme.colorScheme.outline.withAlpha(20),
+              backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
             ),
           ),
@@ -223,6 +182,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
                 Expanded(
                   child: Center(
                     child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
                       child: _buildStepContent(streak, theme),
                     ),
                   ),
@@ -285,7 +245,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
         Text(
           "Let's take a moment.",
           style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
             color: theme.colorScheme.primary,
           ),
           textAlign: TextAlign.center,
@@ -295,7 +255,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
           "I hear you, and it's completely okay to feel this urge right now. Urges are like waves—they peak, and then they pass. You don't have to fight it; let's just ride it out together.",
           style: theme.textTheme.bodyLarge?.copyWith(
             height: 1.5,
-            color: theme.colorScheme.onSurface.withAlpha(200),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           ),
           textAlign: TextAlign.center,
         ),
@@ -313,7 +273,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
         Text(
           "Creating a Pause",
           style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
             color: theme.colorScheme.primary,
           ),
           textAlign: TextAlign.center,
@@ -323,7 +283,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
           "Let's pause for 10 seconds before making any decisions. Just sit with your hands on your lap, and let this countdown finish.",
           style: theme.textTheme.bodyLarge?.copyWith(
             height: 1.5,
-            color: theme.colorScheme.onSurface.withAlpha(200),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           ),
           textAlign: TextAlign.center,
         ),
@@ -334,7 +294,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: theme.colorScheme.primary.withAlpha(100),
+              color: theme.colorScheme.primary.withValues(alpha: 0.4),
               width: 3,
             ),
           ),
@@ -352,83 +312,52 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
     );
   }
 
-  // Step 3: Breathing Exercise
+  // Step 3: Mindful Breathing
   Widget _buildBreathingStep(ThemeData theme) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          "Take a breath",
+          "Mindful Breathing",
           style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
             color: theme.colorScheme.primary,
           ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 12),
         Text(
-          "Follow the circle. Let's do 3 gentle breath cycles.",
+          "Synchronize your breath with the expanding and glowing companion orb.",
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withAlpha(180),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+            height: 1.4,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 60),
-        AnimatedBuilder(
-          animation: _breathingAnimation,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _breathingAnimation.value,
-              child: Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      theme.colorScheme.primary.withAlpha(90),
-                      theme.colorScheme.primary.withAlpha(20),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.colorScheme.primary.withAlpha(40),
-                      blurRadius: 30,
-                      spreadRadius: 5,
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _breathingText,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "$_breathTimerSeconds s",
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.primary.withAlpha(200),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 40),
+        const SizedBox(height: 50),
+        
+        // Premium Breathing Orb
+        const HealingOrb(isMini: false, isTyping: false),
+        
+        const SizedBox(height: 50),
         Text(
-          "Breath cycles: $_breathCount of 3",
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.bold,
+          "Rest your mind • $_breathingCountdownSeconds seconds remaining",
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
             color: theme.colorScheme.secondary,
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: 200,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: (60 - _breathingCountdownSeconds) / 60.0,
+              minHeight: 6,
+              backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.1),
+              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+            ),
           ),
         ),
       ],
@@ -441,15 +370,15 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Center(
-          child: const Icon(Icons.psychology_outlined, size: 64, color: Color(0xFFFFB74D)),
+        const Center(
+          child: Icon(Icons.psychology_outlined, size: 64, color: Color(0xFFFFB74D)),
         ),
         const SizedBox(height: 24),
         Center(
           child: Text(
             "Inner Reflection",
             style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               color: theme.colorScheme.primary,
             ),
           ),
@@ -458,8 +387,8 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
         Text(
           "What is this urge trying to tell you? Are you feeling lonely, angry, sad, or just seeking closure?",
           style: theme.textTheme.bodyLarge?.copyWith(
-            height: 1.4,
-            color: theme.colorScheme.onSurface.withAlpha(200),
+            height: 1.45,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           ),
           textAlign: TextAlign.center,
         ),
@@ -470,11 +399,11 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
           style: theme.textTheme.bodyMedium,
           decoration: InputDecoration(
             hintText: "I am feeling...",
-            fillColor: theme.colorScheme.surface.withAlpha(120),
+            fillColor: theme.colorScheme.surface.withValues(alpha: 0.5),
             filled: true,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: theme.colorScheme.outline.withAlpha(60)),
+              borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
@@ -496,7 +425,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
         Text(
           "Protect your progress",
           style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
             color: theme.colorScheme.primary,
           ),
           textAlign: TextAlign.center,
@@ -505,9 +434,9 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
         Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withAlpha(15),
+            color: theme.colorScheme.primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: theme.colorScheme.primary.withAlpha(40)),
+            border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.15)),
           ),
           child: Column(
             children: [
@@ -535,7 +464,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
           "Every day of space you give yourself is another day of rewiring triggers and reclaiming your independence. Let's protect this today.",
           style: theme.textTheme.bodyMedium?.copyWith(
             height: 1.5,
-            color: theme.colorScheme.onSurface.withAlpha(180),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           ),
           textAlign: TextAlign.center,
         ),
@@ -560,7 +489,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
         Text(
           "Alternative Action",
           style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w900,
             color: theme.colorScheme.primary,
           ),
           textAlign: TextAlign.center,
@@ -569,7 +498,7 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
         Text(
           "Instead of texting them, commit to doing one of these supportive activities right now:",
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurface.withAlpha(200),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           ),
           textAlign: TextAlign.center,
         ),
@@ -591,13 +520,13 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? theme.colorScheme.primary.withAlpha(20)
-                      : theme.colorScheme.surface.withAlpha(120),
+                      ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                      : theme.colorScheme.surface.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isSelected
                         ? theme.colorScheme.primary
-                        : theme.colorScheme.outline.withAlpha(50),
+                        : theme.colorScheme.outline.withValues(alpha: 0.15),
                     width: isSelected ? 2.0 : 1.0,
                   ),
                 ),
@@ -635,15 +564,15 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Center(
-          child: const Icon(Icons.edit_note_rounded, size: 64, color: Color(0xFFBA68C8)),
+        const Center(
+          child: Icon(Icons.edit_note_rounded, size: 64, color: Color(0xFFBA68C8)),
         ),
         const SizedBox(height: 24),
         Center(
           child: Text(
             "Write it out",
             style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w900,
               color: theme.colorScheme.primary,
             ),
           ),
@@ -652,8 +581,8 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
         Text(
           "If you have something you desperately want to say to them, type it below instead. This will be safely locked in your journals, and never sent.",
           style: theme.textTheme.bodyLarge?.copyWith(
-            height: 1.4,
-            color: theme.colorScheme.onSurface.withAlpha(200),
+            height: 1.45,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           ),
           textAlign: TextAlign.center,
         ),
@@ -664,11 +593,11 @@ class _SosExperienceViewState extends ConsumerState<SosExperienceView> with Tick
           style: theme.textTheme.bodyMedium,
           decoration: InputDecoration(
             hintText: "Dear Ex, I wanted to say...",
-            fillColor: theme.colorScheme.surface.withAlpha(120),
+            fillColor: theme.colorScheme.surface.withValues(alpha: 0.5),
             filled: true,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: theme.colorScheme.outline.withAlpha(60)),
+              borderSide: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
