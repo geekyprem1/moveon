@@ -29,7 +29,7 @@ class LettersListScreen extends ConsumerWidget {
             children: [
               Text('🔒', style: TextStyle(color: theme.colorScheme.primary)),
               const SizedBox(width: 8),
-              const Text('Capsule Sealed'),
+              const Text('Entrusted to Time'),
             ],
           ),
           content: Column(
@@ -37,7 +37,7 @@ class LettersListScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'This letter is locked in a time capsule to help you resist the urge to contact your ex.',
+                'This letter has been locked away. Let time hold these feelings for you while you focus on your own healing path.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   height: 1.5,
                   color: theme.colorScheme.onSurface.withAlpha(200),
@@ -91,7 +91,7 @@ class LettersListScreen extends ConsumerWidget {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                'I Will Wait',
+                'I Will Let Time Heal',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.primary,
@@ -221,13 +221,13 @@ class LettersListScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Letters I’ll Never Send',
+            'Released Echoes',
             style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: -0.5),
           ),
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Drafts', icon: Icon(Icons.edit_document)),
-              Tab(text: 'Time Capsule', icon: Icon(Icons.lock_clock)),
+              Tab(text: 'Entrusted', icon: Icon(Icons.lock_clock)),
               Tab(text: 'Released', icon: Icon(Icons.local_fire_department)),
             ],
           ),
@@ -347,8 +347,8 @@ class LettersListScreen extends ConsumerWidget {
                   return _buildEmptyState(
                     context,
                     emoji: '🔒',
-                    title: 'No sealed letters',
-                    subtitle: 'Lock a letter in the time capsule to lock away emotional triggers until you are ready to process them.',
+                    title: 'No entrusted letters',
+                    subtitle: 'Lock a letter in a time capsule to entrust it to time, giving yourself space to heal.',
                   );
                 }
                 return ListView.builder(
@@ -387,7 +387,7 @@ class LettersListScreen extends ConsumerWidget {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Time Capsule',
+                                        'Entrusted to Time',
                                         style: theme.textTheme.titleMedium?.copyWith(
                                           fontWeight: FontWeight.w800,
                                           fontSize: 16,

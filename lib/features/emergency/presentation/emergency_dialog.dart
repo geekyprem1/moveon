@@ -131,7 +131,7 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        _activeExerciseIndex == 0 ? 'Emergency Toolkit' : 'SOS Exercise',
+                        _activeExerciseIndex == 0 ? 'Sanctuary of Calm' : 'Sanctuary Exercise',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -156,11 +156,11 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
                   Row(
                     children: [
                       Expanded(
-                        child: _buildMiniStat('Streak', '${widget.streakDays} Days', theme.colorScheme.primary, theme),
+                        child: _buildMiniStat('Days of Space', '${widget.streakDays} Days', theme.colorScheme.primary, theme),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: _buildMiniStat('Recovery', '${widget.recoveryScore.toInt()}%', scoreColor, theme),
+                        child: _buildMiniStat('Peace Index', '${widget.recoveryScore.toInt()}%', scoreColor, theme),
                       ),
                     ],
                   ),
@@ -201,25 +201,25 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
                     children: [
                       _buildExerciseMenuItem(
                         icon: '🌬️',
-                        title: 'Box Breathing',
+                        title: 'Breath of Peace',
                         onTap: () => setState(() => _activeExerciseIndex = 1),
                         theme: theme,
                       ),
                       _buildExerciseMenuItem(
                         icon: '🎈',
-                        title: '4-7-8 Breathing',
+                        title: 'Deep Release Breath',
                         onTap: () => setState(() => _activeExerciseIndex = 2),
                         theme: theme,
                       ),
                       _buildExerciseMenuItem(
                         icon: '🧘',
-                        title: 'Grounding 5-4-3-2-1',
+                        title: 'Reclaiming the Present',
                         onTap: () => setState(() => _activeExerciseIndex = 3),
                         theme: theme,
                       ),
                       _buildExerciseMenuItem(
                         icon: '⏱️',
-                        title: '60s Delay Timer',
+                        title: 'A Moment of Pause',
                         onTap: () => setState(() => _activeExerciseIndex = 4),
                         theme: theme,
                       ),
@@ -242,7 +242,7 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
                       ),
                     ),
                     child: const Text(
-                      'I Will Stay Strong',
+                      'I Will Breathe Through This',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -391,7 +391,7 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
               const Text('🎵'),
               const SizedBox(width: 8),
               Text(
-                'Relaxing Ambience',
+                'Sounds of Silence',
                 style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ],
@@ -606,7 +606,7 @@ class _BoxBreathingWidgetState extends State<_BoxBreathingWidget> with SingleTic
           ),
           const SizedBox(height: 4),
           Text(
-            widget.isBoxType ? '4-4-4-4 Box Breathing' : '4-7-8 Breathing Technique',
+            widget.isBoxType ? '4-4-4-4 Breath of Peace' : 'Deep Release Breath (4-7-8)',
             style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.secondary),
           ),
           const SizedBox(height: 8),

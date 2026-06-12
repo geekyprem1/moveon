@@ -21,11 +21,11 @@ class DashboardScreen extends ConsumerWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Reset Streak?'),
+          title: const Text('Begin Anew?'),
           content: Text(
             hasShield
-                ? 'Did you break No Contact? You have a Streak Freeze Shield available! Using it will protect your streak so you don’t reset to 0.'
-                : 'Did you break No Contact? This will reset your streak to 0 days. Be honest with yourself—it is part of the healing process.',
+                ? 'Have you chosen to create space today, or did you reach out? You have a Compassion Cushion available. Applying grace will protect your Days of Space.'
+                : 'Have you chosen to create space today, or did you reach out? Starting fresh is not a failure—it is a gentle continuation of your healing spiral. Be honest with your heart.',
           ),
           actions: [
             TextButton(
@@ -43,7 +43,7 @@ class DashboardScreen extends ConsumerWidget {
                     if (success) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('🛡️ Streak protected by Freeze Shield!'),
+                          content: Text('🌸 Days of Space protected by Compassion Cushion.'),
                           backgroundColor: Colors.green,
                         ),
                       );
@@ -51,7 +51,7 @@ class DashboardScreen extends ConsumerWidget {
                   }
                 },
                 child: const Text(
-                  'Use Shield',
+                  'Apply Grace',
                   style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -61,7 +61,7 @@ class DashboardScreen extends ConsumerWidget {
                 Navigator.of(context).pop();
               },
               child: Text(
-                'Reset to 0',
+                'Start Fresh',
                 style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
             ),
@@ -148,6 +148,88 @@ class DashboardScreen extends ConsumerWidget {
     return count;
   }
 
+  Widget _buildCategoryHeader(BuildContext context, String title, String emoji, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0, top: 14.0, bottom: 8.0),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 14)),
+          const SizedBox(width: 8),
+          Text(
+            title.toUpperCase(),
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.secondary.withAlpha(200),
+              letterSpacing: 1.5,
+              fontSize: 10.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompletionReward(BuildContext context, ThemeData theme) {
+    return Container(
+      margin: const EdgeInsets.only(top: 20.0),
+      padding: const EdgeInsets.all(20.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: Colors.amber.withAlpha(80),
+          width: 1.5,
+        ),
+        gradient: LinearGradient(
+          colors: [
+            theme.colorScheme.primaryContainer.withAlpha(25),
+            Colors.amber.withAlpha(15),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(3),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('✨', style: TextStyle(fontSize: 20)),
+              const SizedBox(width: 8),
+              Text(
+                'A Moment of Grace',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: theme.colorScheme.primary,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text('✨', style: TextStyle(fontSize: 20)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'You held space for your Heart, Mind, and Body today. Healing is not about speed; it is about these small, brave choices. Rest deeply.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.5,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildGoalTile(
     BuildContext context,
     WidgetRef ref,
@@ -160,62 +242,97 @@ class DashboardScreen extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(vertical: 6.0),
       decoration: BoxDecoration(
         color: isDone
-            ? theme.colorScheme.primaryContainer.withAlpha(20)
-            : theme.colorScheme.surfaceContainerHighest.withAlpha(30),
+            ? theme.colorScheme.primaryContainer.withAlpha(15)
+            : theme.colorScheme.surfaceContainerHighest.withAlpha(25),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDone
-              ? theme.colorScheme.primary.withAlpha(30)
-              : theme.colorScheme.onSurface.withAlpha(15),
+              ? theme.colorScheme.primary.withAlpha(25)
+              : theme.colorScheme.onSurface.withAlpha(10),
           width: 1.0,
         ),
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isDone
-                ? theme.colorScheme.primaryContainer.withAlpha(60)
-                : theme.colorScheme.primaryContainer.withAlpha(120),
+                ? theme.colorScheme.primaryContainer.withAlpha(50)
+                : theme.colorScheme.surfaceContainerHighest.withAlpha(100),
             shape: BoxShape.circle,
           ),
           child: Text(
             task.icon,
-            style: const TextStyle(fontSize: 18),
+            style: const TextStyle(fontSize: 20),
           ),
         ),
         title: Text(
           task.title,
           style: TextStyle(
             fontSize: 15,
-            fontWeight: isDone ? FontWeight.w400 : FontWeight.w600,
-            decoration: isDone ? TextDecoration.lineThrough : null,
+            fontWeight: FontWeight.w700,
             color: isDone
-                ? theme.colorScheme.onSurface.withAlpha(102)
+                ? theme.colorScheme.onSurface.withAlpha(120)
                 : theme.colorScheme.onSurface,
             letterSpacing: -0.1,
+          ),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: Text(
+            task.healingInsight,
+            style: TextStyle(
+              fontSize: 11.5,
+              height: 1.3,
+              fontWeight: FontWeight.w400,
+              color: theme.colorScheme.onSurfaceVariant.withAlpha(isDone ? 100 : 150),
+            ),
           ),
         ),
         trailing: GestureDetector(
           onTap: () {
             ref.read(dashboardControllerProvider.notifier).toggleTask(task.id, !isDone);
           },
-          child: AnimatedContainer(
+          child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
-            width: 26,
-            height: 26,
-            decoration: BoxDecoration(
-              color: isDone ? theme.colorScheme.primary : Colors.transparent,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isDone ? theme.colorScheme.primary : theme.colorScheme.outline.withAlpha(102),
-                width: 2,
-              ),
-            ),
             child: isDone
-                ? Icon(Icons.check, size: 15, color: theme.colorScheme.onPrimary)
-                : null,
+                ? Container(
+                    key: const ValueKey('done'),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withAlpha(25),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.green.withAlpha(80), width: 1.5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.check, size: 12, color: Colors.green),
+                        const SizedBox(width: 4),
+                        Text(
+                          task.completedVerb,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : Container(
+                    key: const ValueKey('undone'),
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withAlpha(100),
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
           ),
         ),
       ),
@@ -399,7 +516,7 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          "Take it one breath at a time today.",
+                          "Welcome to your sanctuary. Take it one breath at a time.",
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.secondary.withAlpha(204),
                             letterSpacing: 0.1,
@@ -491,7 +608,7 @@ class DashboardScreen extends ConsumerWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  'Score: ${recoveryScore.toInt()}%',
+                                  'Peace Index: ${recoveryScore.toInt()}%',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 11,
@@ -602,8 +719,8 @@ class DashboardScreen extends ConsumerWidget {
                                 const SizedBox(width: 8),
                                 Text(
                                   user.streakShieldsAvailable > 0
-                                      ? 'Streak Shield Active (1 Freeze available)'
-                                      : 'Shield Used (Recharging in 7 days)',
+                                      ? 'Compassion Cushion Active (1 Grace available)'
+                                      : 'Cushion Recharging (Restoring in 7 days)',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: user.streakShieldsAvailable > 0
@@ -776,7 +893,7 @@ class DashboardScreen extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Daily Healing Goals',
+                                'Daily Healing Rituals',
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 18,
@@ -799,11 +916,36 @@ class DashboardScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          ...AppTasks.defaultTasks.map((task) {
+                          const SizedBox(height: 8),
+                          // Heart Tasks
+                          _buildCategoryHeader(context, 'Heart', '💖', theme),
+                          ...AppTasks.defaultTasks
+                              .where((task) => task.category == 'Heart')
+                              .map((task) {
                             final bool isDone = completedTasks.contains(task.id);
                             return _buildGoalTile(context, ref, task, isDone, theme);
                           }),
+                          const SizedBox(height: 8),
+                          // Mind Tasks
+                          _buildCategoryHeader(context, 'Mind', '🧠', theme),
+                          ...AppTasks.defaultTasks
+                              .where((task) => task.category == 'Mind')
+                              .map((task) {
+                            final bool isDone = completedTasks.contains(task.id);
+                            return _buildGoalTile(context, ref, task, isDone, theme);
+                          }),
+                          const SizedBox(height: 8),
+                          // Body Tasks
+                          _buildCategoryHeader(context, 'Body', '🌿', theme),
+                          ...AppTasks.defaultTasks
+                              .where((task) => task.category == 'Body')
+                              .map((task) {
+                            final bool isDone = completedTasks.contains(task.id);
+                            return _buildGoalTile(context, ref, task, isDone, theme);
+                          }),
+                          // Completion Reward Card
+                          if (_getCompletedCount(completedTasks) == AppTasks.defaultTasks.length)
+                            _buildCompletionReward(context, theme),
                         ],
                       ),
                     ),
@@ -833,8 +975,8 @@ class DashboardScreen extends ConsumerWidget {
                         onTap: () => ref.read(activeTabProvider.notifier).state = 1,
                         borderRadius: BorderRadius.circular(28),
                         child: Padding(
-                          padding: const EdgeInsets.all(20.0),
-                          child: Row(
+                           padding: const EdgeInsets.all(20.0),
+                           child: Row(
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(14),
@@ -924,7 +1066,7 @@ class DashboardScreen extends ConsumerWidget {
                               const SizedBox(width: 14),
                               Expanded(
                                 child: Text(
-                                  'Urge to contact your ex? 🆘',
+                                  'Seeking Stillness? 🤍',
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w800,
                                     color: sosTitle,
@@ -937,7 +1079,7 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 14),
                           Text(
-                            'Before you text or call, take a pause. We have exercises, breathing guides, and delay timers ready to help you hold boundaries.',
+                            'Before you reach out, take a slow breath. Let this urge pass like a wave. We are here to hold this space with you.',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: sosDesc,
                               fontSize: 13,
@@ -957,7 +1099,7 @@ class DashboardScreen extends ConsumerWidget {
                             },
                             icon: Icon(Icons.favorite_rounded, size: 16, color: sosBtnText),
                             label: const Text(
-                              'Open Emergency Toolkit',
+                              'Enter the Sanctuary',
                               style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 0.1),
                             ),
                             style: ElevatedButton.styleFrom(
@@ -981,7 +1123,7 @@ class DashboardScreen extends ConsumerWidget {
                     Padding(
                       padding: const EdgeInsets.only(left: 4.0, bottom: 16.0),
                       child: Text(
-                        'Recent Mood Timeline',
+                        'Your Emotional Flow',
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 18,
@@ -1217,6 +1359,7 @@ class _StreakProgressRingState extends State<_StreakProgressRing> with SingleTic
         child: Stack(
           alignment: Alignment.center,
           children: [
+            // Soft glowing backdrop
             Container(
               width: 200,
               height: 200,
@@ -1224,11 +1367,27 @@ class _StreakProgressRingState extends State<_StreakProgressRing> with SingleTic
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    widget.scoreColor.withAlpha(35),
+                    widget.scoreColor.withAlpha(25),
                     widget.scoreColor.withAlpha(5),
                     Colors.transparent,
                   ],
                   stops: const [0.0, 0.6, 1.0],
+                ),
+              ),
+            ),
+            // Custom Painter Sunrise Illustration
+            Container(
+              width: 172,
+              height: 172,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: CustomPaint(
+                painter: _SanctuarySunrisePainter(
+                  primaryColor: widget.scoreColor,
+                  secondaryColor: theme.colorScheme.secondary,
+                  backgroundColor: theme.colorScheme.surface,
                 ),
               ),
             ),
@@ -1276,7 +1435,7 @@ class _StreakProgressRingState extends State<_StreakProgressRing> with SingleTic
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'NO CONTACT',
+                  'OF SPACE',
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontSize: 8,
                     color: theme.colorScheme.secondary.withAlpha(120),
@@ -1290,4 +1449,80 @@ class _StreakProgressRingState extends State<_StreakProgressRing> with SingleTic
       ),
     );
   }
+}
+
+class _SanctuarySunrisePainter extends CustomPainter {
+  final Color primaryColor;
+  final Color secondaryColor;
+  final Color backgroundColor;
+
+  _SanctuarySunrisePainter({
+    required this.primaryColor,
+    required this.secondaryColor,
+    required this.backgroundColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..style = PaintingStyle.fill;
+
+    // 1. Draw glowing sun in center/back
+    final sunCenter = Offset(size.width / 2, size.height * 0.65);
+    final sunPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..shader = RadialGradient(
+        colors: [
+          primaryColor.withAlpha(70),
+          secondaryColor.withAlpha(15),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.55, 1.0],
+      ).createShader(Rect.fromCircle(center: sunCenter, radius: size.width * 0.45));
+    canvas.drawCircle(sunCenter, size.width * 0.45, sunPaint);
+
+    // 2. Draw background hill path
+    final bgHillPath = Path()
+      ..moveTo(0, size.height * 0.8)
+      ..quadraticBezierTo(size.width * 0.3, size.height * 0.6, size.width * 0.75, size.height * 0.75)
+      ..quadraticBezierTo(size.width * 0.9, size.height * 0.8, size.width, size.height * 0.7)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    paint.color = secondaryColor.withAlpha(20);
+    canvas.drawPath(bgHillPath, paint);
+
+    // 3. Draw foreground hill path
+    final fgHillPath = Path()
+      ..moveTo(0, size.height * 0.9)
+      ..quadraticBezierTo(size.width * 0.45, size.height * 0.75, size.width, size.height * 0.85)
+      ..lineTo(size.width, size.height)
+      ..lineTo(0, size.height)
+      ..close();
+    paint.color = primaryColor.withAlpha(30);
+    canvas.drawPath(fgHillPath, paint);
+
+    // 4. Draw a tiny bird or wave ripples for peace
+    final birdPaint = Paint()
+      ..color = primaryColor.withAlpha(80)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round;
+
+    // Bird 1
+    final bird1Path = Path()
+      ..moveTo(size.width * 0.3, size.height * 0.4)
+      ..quadraticBezierTo(size.width * 0.33, size.height * 0.37, size.width * 0.36, size.height * 0.4)
+      ..quadraticBezierTo(size.width * 0.39, size.height * 0.37, size.width * 0.42, size.height * 0.4);
+    canvas.drawPath(bird1Path, birdPaint);
+
+    // Bird 2
+    final bird2Path = Path()
+      ..moveTo(size.width * 0.65, size.height * 0.35)
+      ..quadraticBezierTo(size.width * 0.67, size.height * 0.33, size.width * 0.69, size.height * 0.35)
+      ..quadraticBezierTo(size.width * 0.71, size.height * 0.33, size.width * 0.73, size.height * 0.35);
+    canvas.drawPath(bird2Path, birdPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SanctuarySunrisePainter oldDelegate) => false;
 }

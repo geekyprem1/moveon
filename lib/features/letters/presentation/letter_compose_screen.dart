@@ -110,7 +110,7 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  '🔒 Seal in Time Capsule',
+                  '🔒 Entrust to Time',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.5,
@@ -119,7 +119,7 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'This letter will be locked. You will NOT be able to open, read, or edit it until the selected duration ends to protect your emotional distance.',
+                  'This letter will be locked away in a time capsule. You will not be able to read or edit it until the duration ends, helping you entrust these feelings to time.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.secondary.withAlpha(180),
                     height: 1.4,
@@ -224,7 +224,7 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
 
       await ref.read(lettersRepositoryProvider).saveLetter(user.uid, letter);
       scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text('Letter sealed in Time Capsule for $days days.')),
+        SnackBar(content: Text('Letter entrusted to time for $days days.')),
       );
       navigator.pop();
     } catch (e) {
@@ -281,7 +281,7 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.letterId == null ? 'New Unsent Letter' : 'Edit Letter'),
+        title: Text(widget.letterId == null ? 'Write an Echo' : 'Edit Echo'),
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
@@ -433,7 +433,7 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                             child: ElevatedButton.icon(
                               onPressed: _showTimeCapsuleLockOptions,
                               icon: const Icon(Icons.lock_clock),
-                              label: const Text('Time Capsule'),
+                              label: const Text('Entrust to Time'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 14),
                                 elevation: 0,
@@ -455,7 +455,7 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                             child: ElevatedButton.icon(
                               onPressed: _burnLetterAnimation,
                               icon: const Icon(Icons.local_fire_department),
-                              label: const Text('Burn Letter'),
+                              label: const Text('Release to Fire'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 14),
                                 elevation: 0,

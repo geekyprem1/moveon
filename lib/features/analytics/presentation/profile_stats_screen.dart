@@ -49,7 +49,7 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Recovery Insights',
+          'My Healing Path',
           style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: -0.5),
         ),
         actions: [
@@ -192,7 +192,7 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Overall Statistics',
+                            'Healing Path',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
                               fontSize: 16,
@@ -208,12 +208,12 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                             mainAxisSpacing: 12,
                             crossAxisSpacing: 12,
                             children: [
-                              _buildStatItem('Streak', '${user.noContactStreak} Days', theme.colorScheme.primary, theme),
-                              _buildStatItem('Longest Streak', '${user.longestStreak} Days', theme.colorScheme.secondary, theme),
-                              _buildStatItem('Journal Notes', '$journalsCount', theme.colorScheme.tertiary, theme),
+                              _buildStatItem('Days of Space', '${user.noContactStreak} Days', theme.colorScheme.primary, theme),
+                              _buildStatItem('Longest Peace', '${user.longestStreak} Days', theme.colorScheme.secondary, theme),
+                              _buildStatItem('Reflection Logs', '$journalsCount', theme.colorScheme.tertiary, theme),
                               _buildStatItem('Mood Logs', '${moods.length}', Colors.orange, theme),
                               _buildStatItem('Task Days', '$completedTasksDays', Colors.green, theme),
-                              _buildStatItem('Recovery %', '${recoveryScore.toInt()}%', AppColors.getScoreColor(recoveryScore), theme),
+                              _buildStatItem('Healing Alignment', '${recoveryScore.toInt()}%', AppColors.getScoreColor(recoveryScore), theme),
                             ],
                           ),
                         ],
@@ -230,7 +230,7 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                   RecoveryTimeline(streakDays: user.noContactStreak),
                   const SizedBox(height: 24),
 
-                  // Recovery Insights Card
+                  // Sanctuary Wisdom Insights Card
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
@@ -253,7 +253,7 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Recovery Insights',
+                            'Sanctuary Wisdom',
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
                               fontSize: 16,
@@ -279,8 +279,8 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                           ),
                           _buildInsightItem(
                             icon: '🔥',
-                            title: 'Longest Streak',
-                            desc: 'Your longest No Contact record is ${user.longestStreak} days.',
+                            title: 'Longest Peace',
+                            desc: 'Your longest Days of Space record is ${user.longestStreak} days.',
                             theme: theme,
                           ),
                           _buildInsightItem(
