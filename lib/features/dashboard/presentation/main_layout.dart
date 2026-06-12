@@ -7,6 +7,7 @@ import '../../analytics/data/achievement_service.dart';
 import '../../analytics/presentation/profile_stats_screen.dart';
 import '../../journal/presentation/journal_list_screen.dart';
 import '../../letters/presentation/letters_list_screen.dart';
+import '../../coach/presentation/coach_screen.dart';
 import 'dashboard_screen.dart';
 
 class MainLayout extends ConsumerStatefulWidget {
@@ -41,6 +42,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
     final List<Widget> screens = const [
       DashboardScreen(),
       JournalListScreen(),
+      CoachScreen(),
       LettersListScreen(),
       ProfileStatsScreen(),
     ];
@@ -88,6 +90,11 @@ class CustomBottomNavBar extends StatelessWidget {
         label: 'Journals',
       ),
       _NavBarDestination(
+        icon: Icons.spa_outlined,
+        selectedIcon: Icons.spa_rounded,
+        label: 'Coach',
+      ),
+      _NavBarDestination(
         icon: Icons.mail_outline_rounded,
         selectedIcon: Icons.mail_rounded,
         label: 'Letters',
@@ -119,7 +126,7 @@ class CustomBottomNavBar extends StatelessWidget {
             final dest = destinations[index];
 
             return Expanded(
-              flex: isSelected ? 32 : 20,
+              flex: isSelected ? 26 : 18,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => onDestinationSelected(index),
@@ -127,7 +134,7 @@ class CustomBottomNavBar extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeOutCubic,
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),
                       gradient: isSelected
@@ -156,28 +163,34 @@ class CustomBottomNavBar extends StatelessWidget {
                             color: isSelected
                                 ? theme.colorScheme.primary
                                 : theme.colorScheme.onSurfaceVariant.withAlpha(153),
-                            size: 22,
+                            size: 20,
                           ),
-                          AnimatedSize(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOutCubic,
-                            child: Row(
-                              children: [
-                                if (isSelected) ...[
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    dest.label,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w800,
-                                      color: theme.colorScheme.primary,
-                                      letterSpacing: 0.2,
+                          if (isSelected)
+                            Flexible(
+                              child: AnimatedSize(
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeOutCubic,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        dest.label,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800,
+                                          color: theme.colorScheme.primary,
+                                          letterSpacing: 0.1,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ],
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),

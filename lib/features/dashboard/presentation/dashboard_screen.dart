@@ -789,17 +789,21 @@ class DashboardScreen extends ConsumerWidget {
                                       : theme.colorScheme.secondary.withAlpha(128),
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
-                                  user.streakShieldsAvailable > 0
-                                      ? 'Compassion Cushion Active (1 Grace available)'
-                                      : 'Cushion Recharging (Restoring in 7 days)',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: user.streakShieldsAvailable > 0
-                                        ? Colors.green
-                                        : theme.colorScheme.secondary.withAlpha(204),
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.1,
+                                Flexible(
+                                  child: Text(
+                                    user.streakShieldsAvailable > 0
+                                        ? 'Compassion Cushion Active (1 Grace available)'
+                                        : 'Cushion Recharging (Restoring in 7 days)',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: user.streakShieldsAvailable > 0
+                                          ? Colors.green
+                                          : theme.colorScheme.secondary.withAlpha(204),
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.1,
+                                    ),
                                   ),
                                 ),
                               ],

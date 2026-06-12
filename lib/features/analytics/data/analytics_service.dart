@@ -62,4 +62,52 @@ class AnalyticsService {
       debugPrint('Analytics error: $e');
     }
   }
+
+  Future<void> logCoachOpened() async {
+    try {
+      await _analytics.logEvent(name: 'coach_opened');
+    } catch (e) {
+      debugPrint('Analytics error: $e');
+    }
+  }
+
+  Future<void> logCoachMessageSent() async {
+    try {
+      await _analytics.logEvent(name: 'coach_message_sent');
+    } catch (e) {
+      debugPrint('Analytics error: $e');
+    }
+  }
+
+  Future<void> logCoachResponseGenerated() async {
+    try {
+      await _analytics.logEvent(name: 'coach_response_generated');
+    } catch (e) {
+      debugPrint('Analytics error: $e');
+    }
+  }
+
+  Future<void> logSosTriggered() async {
+    try {
+      await _analytics.logEvent(name: 'sos_triggered');
+    } catch (e) {
+      debugPrint('Analytics error: $e');
+    }
+  }
+
+  Future<void> logReflectionCompleted() async {
+    try {
+      await _analytics.logEvent(name: 'reflection_completed');
+    } catch (e) {
+      debugPrint('Analytics error: $e');
+    }
+  }
+
+  Future<void> logDailyLimitReached() async {
+    try {
+      await _analytics.logEvent(name: 'daily_limit_reached');
+    } catch (e) {
+      debugPrint('Analytics error: $e');
+    }
+  }
 }

@@ -1,0 +1,682 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
+import '../../../providers/providers.dart';
+import '../../../utils/haptic_service.dart';
+import '../../journal/domain/journal_entry.dart';
+import 'coach_controller.dart';
+
+class SosExperienceView extends ConsumerStatefulWidget {
+  final VoidCallback onClose;
+
+  const SosExperienceView({super.key, required this.onClose});
+
+  @override
+  ConsumerState<SosExperienceView> createState() => _SosExperienceViewState();
+}
+
+class _SosExperienceViewState extends ConsumerState<SosExperienceView> with TickerProviderStateMixin {
+  int _currentStep = 0;
+  final int _totalSteps = 6;
+  
+  // Pause countdown timer (Step 2)
+  int _pauseSeconds = 10;
+  Timer? _pauseTimer;
+
+  // Breathing variables (Step 3)
+  late AnimationController _breathingController;
+  late Animation<double> _breathingAnimation;
+  String _breathingText = "Get Ready";
+  int _breathCount = 0;
+  Timer? _breathTimer;
+  int _breathTimerSeconds = 0;
+
+  // Input Controllers
+  final TextEditingController _reflectionController = TextEditingController();
+  final TextEditingController _journalController = TextEditingController();
+
+  String _chosenAlternative = "";
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Set up breathing animation controller
+    _breathingController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    );
+    _breathingAnimation = Tween<double>(begin: 1.0, end: 1.6).animate(
+      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOutSine),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pauseTimer?.cancel();
+    _breathTimer?.cancel();
+    _breathingController.dispose();
+    _reflectionController.dispose();
+    _journalController.dispose();
+    super.dispose();
+  }
+
+  void _nextStep() {
+    ref.read(hapticServiceProvider).selection();
+    if (_currentStep < _totalSteps) {
+      setState(() {
+        _currentStep++;
+      });
+      _onStepChanged();
+    } else {
+      _finishSos();
+    }
+  }
+
+  void _onStepChanged() {
+    if (_currentStep == 1) {
+      // Start 10 seconds pause timer
+      _pauseSeconds = 10;
+      _pauseTimer?.cancel();
+      _pauseTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (_pauseSeconds > 0) {
+          setState(() {
+            _pauseSeconds--;
+          });
+        } else {
+          _pauseTimer?.cancel();
+          _nextStep();
+        }
+      });
+    } else if (_currentStep == 2) {
+      // Start breathing exercise
+      _startBreathing();
+    }
+  }
+
+  void _startBreathing() {
+    _breathCount = 0;
+    _breathingText = "Inhale...";
+    _breathingController.forward();
+    
+    _breathTimerSeconds = 4;
+    _breathTimer?.cancel();
+    _breathTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      
+      setState(() {
+        _breathTimerSeconds--;
+        if (_breathTimerSeconds <= 0) {
+          _advanceBreathingPhase();
+        }
+      });
+    });
+  }
+
+  void _advanceBreathingPhase() {
+    if (_breathingText == "Inhale...") {
+      _breathingText = "Hold...";
+      _breathTimerSeconds = 4;
+    } else if (_breathingText == "Hold..." && _breathingController.value > 0.5) {
+      _breathingText = "Exhale...";
+      _breathingController.reverse();
+      _breathTimerSeconds = 4;
+    } else if (_breathingText == "Exhale...") {
+      _breathingText = "Hold...";
+      _breathTimerSeconds = 4;
+    } else {
+      _breathCount++;
+      if (_breathCount >= 3) {
+        _breathTimer?.cancel();
+        _breathingController.stop();
+        _nextStep();
+        return;
+      }
+      _breathingText = "Inhale...";
+      _breathingController.forward();
+      _breathTimerSeconds = 4;
+    }
+  }
+
+  Future<void> _finishSos() async {
+    ref.read(hapticServiceProvider).heavySuccess();
+    
+    String? journalId;
+    if (_journalController.text.trim().isNotEmpty) {
+      final user = ref.read(appUserProvider).value;
+      if (user != null) {
+        journalId = const Uuid().v4();
+        final entry = JournalEntry(
+          id: journalId,
+          title: "SOS Relief Journal",
+          note: _journalController.text.trim(),
+          date: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        await ref.read(journalRepositoryProvider).saveJournal(user.uid, entry);
+        // Track journal created locally
+        ref.read(analyticsServiceProvider).logJournalCreated();
+      }
+    }
+
+    // Save SOS log
+    await ref.read(coachControllerProvider.notifier).completeSosLog(
+      _reflectionController.text.isNotEmpty ? _reflectionController.text : "No Contact Urge",
+      _breathCount >= 2,
+      journalId,
+    );
+
+    widget.onClose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final user = ref.watch(appUserProvider).value;
+    final streak = user?.noContactStreak ?? 0;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? const [
+                  Color(0xFF1E161C), // Deep Rose Charcoal
+                  Color(0xFF151016), // Deep Amethyst Black
+                  Color(0xFF0F0C10), // Midnight Obsidian
+                ]
+              : const [
+                  Color(0xFFFFFDFB), // Warm Ivory
+                  Color(0xFFFAF5FA), // Soft Lavender
+                  Color(0xFFF6EFF2), // Dusty Rose
+                ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: widget.onClose,
+            color: theme.colorScheme.onSurface,
+          ),
+          title: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: (_currentStep + 1) / (_totalSteps + 1),
+              minHeight: 6,
+              backgroundColor: theme.colorScheme.outline.withAlpha(20),
+              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+            ),
+          ),
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: _buildStepContent(streak, theme),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                if (_currentStep != 1 && _currentStep != 2) // Step 1 (Pause) and Step 2 (Breathing) proceed automatically
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      minimumSize: const Size(double.infinity, 54),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28),
+                      ),
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: theme.colorScheme.onPrimary,
+                      elevation: 2,
+                    ),
+                    onPressed: _nextStep,
+                    child: Text(
+                      _currentStep == _totalSteps ? "Complete SOS" : "Continue",
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepContent(int streak, ThemeData theme) {
+    switch (_currentStep) {
+      case 0:
+        return _buildValidationStep(theme);
+      case 1:
+        return _buildPauseStep(theme);
+      case 2:
+        return _buildBreathingStep(theme);
+      case 3:
+        return _buildReflectionStep(theme);
+      case 4:
+        return _buildStreakStep(streak, theme);
+      case 5:
+        return _buildAlternativeStep(theme);
+      case 6:
+        return _buildJournalStep(theme);
+      default:
+        return const SizedBox();
+    }
+  }
+
+  // Step 1: Validate Feelings
+  Widget _buildValidationStep(ThemeData theme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.favorite_rounded, size: 64, color: Color(0xFFE57373)),
+        const SizedBox(height: 24),
+        Text(
+          "Let's take a moment.",
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.primary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          "I hear you, and it's completely okay to feel this urge right now. Urges are like waves—they peak, and then they pass. You don't have to fight it; let's just ride it out together.",
+          style: theme.textTheme.bodyLarge?.copyWith(
+            height: 1.5,
+            color: theme.colorScheme.onSurface.withAlpha(200),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  // Step 2: Create Pause
+  Widget _buildPauseStep(ThemeData theme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.timer_outlined, size: 64, color: Color(0xFF64B5F6)),
+        const SizedBox(height: 24),
+        Text(
+          "Creating a Pause",
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.primary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          "Let's pause for 10 seconds before making any decisions. Just sit with your hands on your lap, and let this countdown finish.",
+          style: theme.textTheme.bodyLarge?.copyWith(
+            height: 1.5,
+            color: theme.colorScheme.onSurface.withAlpha(200),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 40),
+        Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: theme.colorScheme.primary.withAlpha(100),
+              width: 3,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              "$_pauseSeconds",
+              style: theme.textTheme.displayMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Step 3: Breathing Exercise
+  Widget _buildBreathingStep(ThemeData theme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          "Take a breath",
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.primary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          "Follow the circle. Let's do 3 gentle breath cycles.",
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withAlpha(180),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 60),
+        AnimatedBuilder(
+          animation: _breathingAnimation,
+          builder: (context, child) {
+            return Transform.scale(
+              scale: _breathingAnimation.value,
+              child: Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      theme.colorScheme.primary.withAlpha(90),
+                      theme.colorScheme.primary.withAlpha(20),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.primary.withAlpha(40),
+                      blurRadius: 30,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _breathingText,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "$_breathTimerSeconds s",
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: theme.colorScheme.primary.withAlpha(200),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 40),
+        Text(
+          "Breath cycles: $_breathCount of 3",
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.secondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Step 4: Reflection Question
+  Widget _buildReflectionStep(ThemeData theme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: const Icon(Icons.psychology_outlined, size: 64, color: Color(0xFFFFB74D)),
+        ),
+        const SizedBox(height: 24),
+        Center(
+          child: Text(
+            "Inner Reflection",
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          "What is this urge trying to tell you? Are you feeling lonely, angry, sad, or just seeking closure?",
+          style: theme.textTheme.bodyLarge?.copyWith(
+            height: 1.4,
+            color: theme.colorScheme.onSurface.withAlpha(200),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 32),
+        TextField(
+          controller: _reflectionController,
+          maxLines: 4,
+          style: theme.textTheme.bodyMedium,
+          decoration: InputDecoration(
+            hintText: "I am feeling...",
+            fillColor: theme.colorScheme.surface.withAlpha(120),
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: theme.colorScheme.outline.withAlpha(60)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: theme.colorScheme.primary),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Step 5: Streak Reminder
+  Widget _buildStreakStep(int streak, ThemeData theme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.shield_rounded, size: 70, color: Color(0xFF81C784)),
+        const SizedBox(height: 24),
+        Text(
+          "Protect your progress",
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.primary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withAlpha(15),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: theme.colorScheme.primary.withAlpha(40)),
+          ),
+          child: Column(
+            children: [
+              Text(
+                "$streak",
+                style: theme.textTheme.displayLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: theme.colorScheme.primary,
+                  height: 1.1,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Days of Space Kept",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          "Every day of space you give yourself is another day of rewiring triggers and reclaiming your independence. Let's protect this today.",
+          style: theme.textTheme.bodyMedium?.copyWith(
+            height: 1.5,
+            color: theme.colorScheme.onSurface.withAlpha(180),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  // Step 6: Alternative Actions
+  Widget _buildAlternativeStep(ThemeData theme) {
+    final alternatives = [
+      {'icon': Icons.local_drink_rounded, 'label': 'Drink a cold glass of water'},
+      {'icon': Icons.directions_walk_rounded, 'label': 'Go for a quick 5-min walk'},
+      {'icon': Icons.air_rounded, 'label': 'Close your eyes and breathe for 1 min'},
+      {'icon': Icons.call_rounded, 'label': 'Call a close friend or family member'},
+    ];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.alt_route_rounded, size: 64, color: Color(0xFF4DB6AC)),
+        const SizedBox(height: 24),
+        Text(
+          "Alternative Action",
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: theme.colorScheme.primary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 16),
+        Text(
+          "Instead of texting them, commit to doing one of these supportive activities right now:",
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurface.withAlpha(200),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 24),
+        ...alternatives.map((alt) {
+          final isSelected = _chosenAlternative == alt['label'];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _chosenAlternative = alt['label'] as String;
+                });
+                ref.read(hapticServiceProvider).selection();
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? theme.colorScheme.primary.withAlpha(20)
+                      : theme.colorScheme.surface.withAlpha(120),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline.withAlpha(50),
+                    width: isSelected ? 2.0 : 1.0,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      alt['icon'] as IconData,
+                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        alt['label'] as String,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                    if (isSelected)
+                      Icon(Icons.check_circle_rounded, color: theme.colorScheme.primary),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  // Step 7: Encourage Journaling
+  Widget _buildJournalStep(ThemeData theme) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Center(
+          child: const Icon(Icons.edit_note_rounded, size: 64, color: Color(0xFFBA68C8)),
+        ),
+        const SizedBox(height: 24),
+        Center(
+          child: Text(
+            "Write it out",
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          "If you have something you desperately want to say to them, type it below instead. This will be safely locked in your journals, and never sent.",
+          style: theme.textTheme.bodyLarge?.copyWith(
+            height: 1.4,
+            color: theme.colorScheme.onSurface.withAlpha(200),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 32),
+        TextField(
+          controller: _journalController,
+          maxLines: 6,
+          style: theme.textTheme.bodyMedium,
+          decoration: InputDecoration(
+            hintText: "Dear Ex, I wanted to say...",
+            fillColor: theme.colorScheme.surface.withAlpha(120),
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: theme.colorScheme.outline.withAlpha(60)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: theme.colorScheme.primary),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
