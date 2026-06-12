@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/domain/app_user.dart';
 import '../../../providers/providers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../../../utils/haptic_service.dart';
 
 class BadgeDefinition {
   final String id;
@@ -91,6 +92,9 @@ class AchievementService {
 
         // Log Firebase Analytics event
         ref.read(analyticsServiceProvider).logAchievementUnlocked(badge.id);
+
+        // Play success haptic
+        ref.read(hapticServiceProvider).success();
 
         // Trigger milestone local notification
         _triggerMilestoneNotification(badge);

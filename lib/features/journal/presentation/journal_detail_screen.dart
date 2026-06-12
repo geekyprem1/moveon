@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../providers/providers.dart';
+import '../../../utils/haptic_service.dart';
 import '../domain/journal_entry.dart';
 import 'journal_controller.dart';
 
@@ -77,6 +78,7 @@ class _JournalDetailScreenState extends ConsumerState<JournalDetailScreen> {
     if (!mounted) return;
 
     if (success) {
+      ref.read(hapticServiceProvider).medium();
       ref.read(activeTabProvider.notifier).state = 1;
       context.go('/');
     } else {
@@ -120,6 +122,7 @@ class _JournalDetailScreenState extends ConsumerState<JournalDetailScreen> {
 
     if (confirm != true || !mounted) return;
 
+    ref.read(hapticServiceProvider).warning();
     final controller = ref.read(journalControllerProvider.notifier);
     final success = await controller.deleteEntry(widget.entryId!);
 

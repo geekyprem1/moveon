@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../utils/haptic_service.dart';
 
 import '../../../providers/providers.dart';
 import '../../../utils/date_formatter.dart';
@@ -175,7 +176,10 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'journal_fab',
-        onPressed: () => context.go('/journal/new'),
+        onPressed: () {
+          ref.read(hapticServiceProvider).selection();
+          context.go('/journal/new');
+        },
         icon: const Icon(Icons.edit_rounded),
         label: const Text(
           'New Note',
@@ -200,13 +204,13 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
   }
 }
 
-class _JournalCard extends StatelessWidget {
+class _JournalCard extends ConsumerWidget {
   final JournalEntry entry;
 
   const _JournalCard({required this.entry});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     // Limit snippet to 3 lines
@@ -235,7 +239,10 @@ class _JournalCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(28.0),
-          onTap: () => context.go('/journal/edit/${entry.id}'),
+          onTap: () {
+            ref.read(hapticServiceProvider).selection();
+            context.go('/journal/edit/${entry.id}');
+          },
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(

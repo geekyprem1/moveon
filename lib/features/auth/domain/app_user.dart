@@ -19,6 +19,7 @@ class AppUser {
   final String selectedTheme;
   final String themeMode;
   final int healingXp;
+  final bool hapticsEnabled;
   final DateTime createdAt;
   final DateTime lastActiveAt;
 
@@ -41,6 +42,7 @@ class AppUser {
     this.referredBy,
     this.selectedTheme = 'classic',
     this.themeMode = 'system',
+    this.hapticsEnabled = true,
     DateTime? createdAt,
     DateTime? lastActiveAt,
   })  : referralCode = referralCode ?? 'MOVEON-${uid.length >= 5 ? uid.substring(0, 5).toUpperCase() : uid.toUpperCase()}',
@@ -83,6 +85,7 @@ class AppUser {
     String? referredBy,
     String? selectedTheme,
     String? themeMode,
+    bool? hapticsEnabled,
     DateTime? createdAt,
     DateTime? lastActiveAt,
   }) {
@@ -105,6 +108,7 @@ class AppUser {
       referredBy: referredBy ?? this.referredBy,
       selectedTheme: selectedTheme ?? this.selectedTheme,
       themeMode: themeMode ?? this.themeMode,
+      hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
       createdAt: createdAt ?? this.createdAt,
       lastActiveAt: lastActiveAt ?? this.lastActiveAt,
     );
@@ -130,6 +134,7 @@ class AppUser {
       'referredBy': referredBy,
       'selectedTheme': selectedTheme,
       'themeMode': themeMode,
+      'hapticsEnabled': hapticsEnabled,
       'createdAt': Timestamp.fromDate(createdAt),
       'lastActiveAt': Timestamp.fromDate(lastActiveAt),
     };
@@ -197,6 +202,7 @@ class AppUser {
       referredBy: json['referredBy'] as String?,
       selectedTheme: json['selectedTheme'] as String? ?? 'classic',
       themeMode: json['themeMode'] as String? ?? 'system',
+      hapticsEnabled: json['hapticsEnabled'] as bool? ?? true,
       createdAt: cAt,
       lastActiveAt: lActive,
     );

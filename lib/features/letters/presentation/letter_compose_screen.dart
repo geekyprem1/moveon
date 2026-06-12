@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../providers/providers.dart';
+import '../../../utils/haptic_service.dart';
 import '../domain/unsent_letter.dart';
 import 'burning_animation.dart';
 
@@ -79,6 +80,7 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
       );
 
       await ref.read(lettersRepositoryProvider).saveLetter(user.uid, letter);
+      ref.read(hapticServiceProvider).medium();
       scaffoldMessenger.showSnackBar(
         const SnackBar(content: Text('Draft saved successfully.')),
       );
@@ -223,6 +225,7 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
       );
 
       await ref.read(lettersRepositoryProvider).saveLetter(user.uid, letter);
+      ref.read(hapticServiceProvider).medium();
       scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Letter entrusted to time for $days days.')),
       );
@@ -362,6 +365,7 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                             ),
                             onSelected: (selected) {
                               if (selected) {
+                                ref.read(hapticServiceProvider).selection();
                                 setState(() {
                                   _selectedCategory = cat['name'];
                                 });

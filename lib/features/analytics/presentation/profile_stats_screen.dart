@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../constants/app_colors.dart';
 import '../../../providers/providers.dart';
 import '../../../utils/recovery_calculator.dart';
+import '../../../utils/haptic_service.dart';
 import '../../auth/domain/app_user.dart';
 import '../../auth/presentation/referral_system_dialog.dart';
 import '../../auth/presentation/legal_screens.dart';
@@ -918,6 +919,7 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
             ),
             TextButton(
               onPressed: () async {
+                ref.read(hapticServiceProvider).warning();
                 Navigator.of(context).pop(); // Dismiss first dialog
                 
                 // Show a loading overlay
@@ -1013,6 +1015,21 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
               ),
               trailing: const Icon(Icons.arrow_forward_ios, size: 14),
               onTap: () => _showThemeSelectionDialog(context, ref, user),
+            ),
+            const Divider(),
+
+            SwitchListTile(
+              secondary: const Icon(Icons.vibration_outlined),
+              title: const Text('Premium Haptics'),
+              subtitle: const Text('Intentional, calming tactile feedback', style: TextStyle(fontSize: 11)),
+              value: user.hapticsEnabled,
+              onChanged: (val) async {
+                final updatedUser = user.copyWith(hapticsEnabled: val);
+                await ref.read(authRepositoryProvider).updateUser(updatedUser);
+                if (val) {
+                  ref.read(hapticServiceProvider).selection();
+                }
+              },
             ),
             const Divider(),
             

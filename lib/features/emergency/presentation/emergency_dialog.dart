@@ -7,6 +7,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../../constants/app_colors.dart';
 import '../../../constants/app_quotes.dart';
 import '../../../providers/providers.dart';
+import '../../../utils/haptic_service.dart';
 import '../domain/emergency_click.dart';
 import '../domain/sos_completion.dart';
 
@@ -41,6 +42,10 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
   @override
   void initState() {
     super.initState();
+    
+    // Subtle selection click haptic to feel grounding
+    ref.read(hapticServiceProvider).selection();
+    
     final DateTime now = DateTime.now();
     _prompt = _journalPrompts[now.millisecondsSinceEpoch % _journalPrompts.length];
 
@@ -141,6 +146,7 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
                       IconButton(
                         icon: const Icon(Icons.arrow_back),
                         onPressed: () {
+                          ref.read(hapticServiceProvider).selection();
                           setState(() {
                             _activeExerciseIndex = 0;
                           });
@@ -202,25 +208,37 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
                       _buildExerciseMenuItem(
                         icon: '🌬️',
                         title: 'Breath of Peace',
-                        onTap: () => setState(() => _activeExerciseIndex = 1),
+                        onTap: () {
+                          ref.read(hapticServiceProvider).selection();
+                          setState(() => _activeExerciseIndex = 1);
+                        },
                         theme: theme,
                       ),
                       _buildExerciseMenuItem(
                         icon: '🎈',
                         title: 'Deep Release Breath',
-                        onTap: () => setState(() => _activeExerciseIndex = 2),
+                        onTap: () {
+                          ref.read(hapticServiceProvider).selection();
+                          setState(() => _activeExerciseIndex = 2);
+                        },
                         theme: theme,
                       ),
                       _buildExerciseMenuItem(
                         icon: '🧘',
                         title: 'Reclaiming the Present',
-                        onTap: () => setState(() => _activeExerciseIndex = 3),
+                        onTap: () {
+                          ref.read(hapticServiceProvider).selection();
+                          setState(() => _activeExerciseIndex = 3);
+                        },
                         theme: theme,
                       ),
                       _buildExerciseMenuItem(
                         icon: '⏱️',
                         title: 'A Moment of Pause',
-                        onTap: () => setState(() => _activeExerciseIndex = 4),
+                        onTap: () {
+                          ref.read(hapticServiceProvider).selection();
+                          setState(() => _activeExerciseIndex = 4);
+                        },
                         theme: theme,
                       ),
                     ],

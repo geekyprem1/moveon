@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../utils/haptic_service.dart';
 
-class BurningAnimation extends StatefulWidget {
+class BurningAnimation extends ConsumerStatefulWidget {
   final String title;
   final String content;
   final VoidCallback onComplete;
@@ -14,10 +16,10 @@ class BurningAnimation extends StatefulWidget {
   });
 
   @override
-  State<BurningAnimation> createState() => _BurningAnimationState();
+  ConsumerState<BurningAnimation> createState() => _BurningAnimationState();
 }
 
-class _BurningAnimationState extends State<BurningAnimation> with SingleTickerProviderStateMixin {
+class _BurningAnimationState extends ConsumerState<BurningAnimation> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late List<_Particle> _particles;
   final Random _random = Random();
@@ -41,12 +43,20 @@ class _BurningAnimationState extends State<BurningAnimation> with SingleTickerPr
 
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
+        ref.read(hapticServiceProvider).selection();
         setState(() {
           _releasedTextVisible = true;
         });
         Future.delayed(const Duration(seconds: 2), () {
           widget.onComplete();
         });
+      }
+    });
+
+    // Subtle delay, medium impact, matching the fade animation
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        ref.read(hapticServiceProvider).medium();
       }
     });
 

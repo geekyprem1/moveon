@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../constants/app_colors.dart';
@@ -12,6 +11,8 @@ import '../../auth/domain/app_user.dart';
 import '../../emergency/presentation/emergency_dialog.dart';
 import '../../mood/domain/mood_entry.dart';
 import 'dashboard_controller.dart';
+import '../../../utils/haptic_service.dart';
+import 'celebration_overlay.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -58,6 +59,7 @@ class DashboardScreen extends ConsumerWidget {
               ),
             TextButton(
               onPressed: () {
+                ref.read(hapticServiceProvider).warning();
                 ref.read(dashboardControllerProvider.notifier).resetStreak();
                 Navigator.of(context).pop();
               },
@@ -285,8 +287,41 @@ class DashboardScreen extends ConsumerWidget {
         ),
         trailing: GestureDetector(
           onTap: () {
-            HapticFeedback.lightImpact();
             final nextState = !isDone;
+            
+            // Check if this completes all daily tasks (success haptic + overlay)
+            bool completesAll = false;
+            final dailyTasks = ref.read(dailyCompletedTasksProvider).value ?? {};
+            final date = DateTime.now();
+            final todayRituals = AppTasks.getDailyRituals(date);
+            
+            if (nextState) {
+              final prospectiveCompleted = Set<String>.from(dailyTasks)..add(task.id);
+              final todayIds = todayRituals.map((r) => r.id).toSet();
+              if (todayIds.every((id) => prospectiveCompleted.contains(id))) {
+                completesAll = true;
+              }
+            }
+
+            if (completesAll) {
+              ref.read(hapticServiceProvider).success();
+              // Show celebration overlay
+              final user = ref.read(appUserProvider).value;
+              final currentXp = user?.healingXp ?? 0;
+              Navigator.of(context).push(
+                PageRouteBuilder(
+                  opaque: false,
+                  barrierColor: Colors.black.withAlpha(220),
+                  pageBuilder: (context, _, __) => CelebrationOverlay(
+                    currentXp: currentXp + 5, // Account for this completion
+                    onDismiss: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              );
+            } else {
+              ref.read(hapticServiceProvider).medium();
+            }
+
             ref.read(dashboardControllerProvider.notifier).toggleTask(task.id, nextState);
             if (nextState) {
               ScaffoldMessenger.of(context).clearSnackBars();
@@ -816,41 +851,46 @@ class DashboardScreen extends ConsumerWidget {
                                 emoji: '😭',
                                 label: 'Terrible',
                                 isSelected: todayMood == 'Terrible',
-                                onTap: () => ref
-                                    .read(dashboardControllerProvider.notifier)
-                                    .selectMood('Terrible'),
+                                onTap: () {
+                                  ref.read(hapticServiceProvider).selection();
+                                  ref.read(dashboardControllerProvider.notifier).selectMood('Terrible');
+                                },
                               ),
                               _MoodOption(
                                 emoji: '😢',
                                 label: 'Sad',
                                 isSelected: todayMood == 'Sad',
-                                onTap: () => ref
-                                    .read(dashboardControllerProvider.notifier)
-                                    .selectMood('Sad'),
+                                onTap: () {
+                                  ref.read(hapticServiceProvider).selection();
+                                  ref.read(dashboardControllerProvider.notifier).selectMood('Sad');
+                                },
                               ),
                               _MoodOption(
                                 emoji: '😐',
                                 label: 'Okay',
                                 isSelected: todayMood == 'Okay',
-                                onTap: () => ref
-                                    .read(dashboardControllerProvider.notifier)
-                                    .selectMood('Okay'),
+                                onTap: () {
+                                  ref.read(hapticServiceProvider).selection();
+                                  ref.read(dashboardControllerProvider.notifier).selectMood('Okay');
+                                },
                               ),
                               _MoodOption(
                                 emoji: '🙂',
                                 label: 'Better',
                                 isSelected: todayMood == 'Better',
-                                onTap: () => ref
-                                    .read(dashboardControllerProvider.notifier)
-                                    .selectMood('Better'),
+                                onTap: () {
+                                  ref.read(hapticServiceProvider).selection();
+                                  ref.read(dashboardControllerProvider.notifier).selectMood('Better');
+                                },
                               ),
                               _MoodOption(
                                 emoji: '😁',
                                 label: 'Great',
                                 isSelected: todayMood == 'Great',
-                                onTap: () => ref
-                                    .read(dashboardControllerProvider.notifier)
-                                    .selectMood('Great'),
+                                onTap: () {
+                                  ref.read(hapticServiceProvider).selection();
+                                  ref.read(dashboardControllerProvider.notifier).selectMood('Great');
+                                },
                               ),
                             ],
                           ),
@@ -1180,6 +1220,7 @@ class DashboardScreen extends ConsumerWidget {
                           const SizedBox(height: 20),
                           ElevatedButton.icon(
                             onPressed: () {
+                              ref.read(hapticServiceProvider).light();
                               ref.read(analyticsServiceProvider).logEmergencyClicked();
                               _showEmergencySupport(
                                 context,

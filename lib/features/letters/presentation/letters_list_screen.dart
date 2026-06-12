@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../providers/providers.dart';
+import '../../../utils/haptic_service.dart';
 import '../domain/unsent_letter.dart';
 import 'letter_compose_screen.dart';
 
@@ -224,8 +225,9 @@ class LettersListScreen extends ConsumerWidget {
             'Released Echoes',
             style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: -0.5),
           ),
-          bottom: const TabBar(
-            tabs: [
+          bottom: TabBar(
+            onTap: (index) => ref.read(hapticServiceProvider).selection(),
+            tabs: const [
               Tab(text: 'Drafts', icon: Icon(Icons.edit_document)),
               Tab(text: 'Entrusted', icon: Icon(Icons.lock_clock)),
               Tab(text: 'Released', icon: Icon(Icons.local_fire_department)),
@@ -277,11 +279,14 @@ class LettersListScreen extends ConsumerWidget {
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(28.0),
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => LetterComposeScreen(letterId: letter.id),
-                            ),
-                          ),
+                          onTap: () {
+                            ref.read(hapticServiceProvider).selection();
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => LetterComposeScreen(letterId: letter.id),
+                              ),
+                            );
+                          },
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
                             child: Row(
@@ -367,7 +372,10 @@ class LettersListScreen extends ConsumerWidget {
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(28.0),
-                          onTap: () => _showLockedDialog(context, letter),
+                          onTap: () {
+                            ref.read(hapticServiceProvider).selection();
+                            _showLockedDialog(context, letter);
+                          },
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
                             child: Row(
@@ -453,7 +461,10 @@ class LettersListScreen extends ConsumerWidget {
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(28.0),
-                          onTap: () => _showBurntLetterDetail(context, letter),
+                          onTap: () {
+                            ref.read(hapticServiceProvider).selection();
+                            _showBurntLetterDetail(context, letter);
+                          },
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
                             child: Row(
@@ -503,9 +514,12 @@ class LettersListScreen extends ConsumerWidget {
         ),
         floatingActionButton: FloatingActionButton.extended(
           heroTag: 'letters_fab',
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const LetterComposeScreen()),
-          ),
+          onPressed: () {
+            ref.read(hapticServiceProvider).selection();
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const LetterComposeScreen()),
+            );
+          },
           icon: const Icon(Icons.edit_rounded),
           label: const Text(
             'Write Letter',

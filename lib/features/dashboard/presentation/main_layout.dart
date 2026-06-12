@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../providers/providers.dart';
+import '../../../utils/haptic_service.dart';
 import '../../analytics/data/achievement_service.dart';
 import '../../analytics/presentation/profile_stats_screen.dart';
 import '../../journal/presentation/journal_list_screen.dart';
@@ -88,6 +89,7 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
         child: NavigationBar(
           selectedIndex: activeIndex,
           onDestinationSelected: (int index) {
+            ref.read(hapticServiceProvider).selection();
             ref.read(activeTabProvider.notifier).state = index;
           },
           destinations: const [
