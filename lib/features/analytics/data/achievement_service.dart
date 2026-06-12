@@ -94,7 +94,7 @@ class AchievementService {
         ref.read(analyticsServiceProvider).logAchievementUnlocked(badge.id);
 
         // Play success haptic
-        ref.read(hapticServiceProvider).success();
+        ref.read(hapticServiceProvider).heavySuccess();
 
         // Trigger milestone local notification
         _triggerMilestoneNotification(badge);

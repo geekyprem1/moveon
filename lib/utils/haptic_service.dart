@@ -37,10 +37,19 @@ class HapticService {
     }
   }
 
-  /// Trigger a success impact (e.g. heavy impact for completion rewards, milestones, unlocking achievements)
+  /// Trigger a success impact (e.g. heavy impact for milestones)
   void success() {
     if (_isEnabled) {
       HapticFeedback.heavyImpact();
+    }
+  }
+
+  /// Trigger an extra heavy dual-beat success haptic (e.g. for achievements)
+  Future<void> heavySuccess() async {
+    if (_isEnabled) {
+      await HapticFeedback.heavyImpact();
+      await Future.delayed(const Duration(milliseconds: 120));
+      await HapticFeedback.mediumImpact();
     }
   }
 

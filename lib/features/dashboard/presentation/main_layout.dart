@@ -28,8 +28,6 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     // 1. Listen to user profile to check and unlock achievements in background
     ref.listen(appUserProvider, (previous, next) {
       final user = next.value;
@@ -52,70 +50,156 @@ class _MainLayoutState extends ConsumerState<MainLayout> {
         index: activeIndex,
         children: screens,
       ),
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          height: 80,
-          elevation: 0,
-          indicatorColor: theme.colorScheme.primaryContainer.withAlpha(102),
-          labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
-            if (states.contains(WidgetState.selected)) {
-              return TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: theme.colorScheme.primary,
-                letterSpacing: 0.2,
-              );
-            }
-            return TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurfaceVariant.withAlpha(153),
-              letterSpacing: 0.2,
-            );
-          }),
-          iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
-            if (states.contains(WidgetState.selected)) {
-              return IconThemeData(
-                color: theme.colorScheme.primary,
-                size: 24,
-              );
-            }
-            return IconThemeData(
-              color: theme.colorScheme.onSurfaceVariant.withAlpha(153),
-              size: 24,
-            );
-          }),
+      bottomNavigationBar: CustomBottomNavBar(
+        selectedIndex: activeIndex,
+        onDestinationSelected: (int index) {
+          ref.read(hapticServiceProvider).selection();
+          ref.read(activeTabProvider.notifier).state = index;
+        },
+      ),
+    );
+  }
+}
+
+class CustomBottomNavBar extends StatelessWidget {
+  final int selectedIndex;
+  final ValueChanged<int> onDestinationSelected;
+
+  const CustomBottomNavBar({
+    super.key,
+    required this.selectedIndex,
+    required this.onDestinationSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final destinations = const [
+      _NavBarDestination(
+        icon: Icons.dashboard_outlined,
+        selectedIcon: Icons.dashboard_rounded,
+        label: 'Dashboard',
+      ),
+      _NavBarDestination(
+        icon: Icons.book_outlined,
+        selectedIcon: Icons.book_rounded,
+        label: 'Journals',
+      ),
+      _NavBarDestination(
+        icon: Icons.mail_outline_rounded,
+        selectedIcon: Icons.mail_rounded,
+        label: 'Letters',
+      ),
+      _NavBarDestination(
+        icon: Icons.analytics_outlined,
+        selectedIcon: Icons.analytics_rounded,
+        label: 'Insights',
+      ),
+    ];
+
+    return Container(
+      height: 76,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: theme.colorScheme.outline.withAlpha(isDark ? 10 : 15),
+            width: 0.5,
+          ),
         ),
-        child: NavigationBar(
-          selectedIndex: activeIndex,
-          onDestinationSelected: (int index) {
-            ref.read(hapticServiceProvider).selection();
-            ref.read(activeTabProvider.notifier).state = index;
-          },
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard_rounded),
-              label: 'Dashboard',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.book_outlined),
-              selectedIcon: Icon(Icons.book_rounded),
-              label: 'Journals',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.mail_outline_rounded),
-              selectedIcon: Icon(Icons.mail_rounded),
-              label: 'Letters',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.analytics_outlined),
-              selectedIcon: Icon(Icons.analytics_rounded),
-              label: 'Insights',
-            ),
-          ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: List.generate(destinations.length, (index) {
+            final isSelected = index == selectedIndex;
+            final dest = destinations[index];
+
+            return Expanded(
+              flex: isSelected ? 32 : 20,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => onDestinationSelected(index),
+                child: Center(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      gradient: isSelected
+                          ? LinearGradient(
+                              colors: isDark
+                                  ? const [
+                                      Color(0xFF2C1E22), // Dark Sakura
+                                      Color(0xFF211E26), // Dark Lavender
+                                    ]
+                                  : const [
+                                      Color(0xFFFFF2F5), // Light Sakura
+                                      Color(0xFFF3EFF5), // Light Lavender
+                                    ],
+                            )
+                          : null,
+                    ),
+                    child: AnimatedScale(
+                      scale: isSelected ? 1.05 : 1.0,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isSelected ? dest.selectedIcon : dest.icon,
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant.withAlpha(153),
+                            size: 22,
+                          ),
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOutCubic,
+                            child: Row(
+                              children: [
+                                if (isSelected) ...[
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    dest.label,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: theme.colorScheme.primary,
+                                      letterSpacing: 0.2,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
         ),
       ),
     );
   }
+}
+
+class _NavBarDestination {
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+
+  const _NavBarDestination({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+  });
 }

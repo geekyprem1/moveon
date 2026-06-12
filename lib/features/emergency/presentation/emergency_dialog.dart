@@ -370,7 +370,7 @@ class _EmergencyDialogState extends ConsumerState<EmergencyDialog> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
         decoration: BoxDecoration(
           color: theme.colorScheme.primaryContainer.withAlpha(20),
           border: Border.all(color: theme.colorScheme.primary.withAlpha(40)),

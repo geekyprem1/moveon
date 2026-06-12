@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../constants/healing_messages.dart';
 import '../../../constants/app_colors.dart';
 import '../../../constants/app_tasks.dart';
 import '../../../providers/providers.dart';
@@ -611,7 +612,7 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          "Welcome to your sanctuary. Take it one breath at a time.",
+                          HealingMessages.getMessageOfTheDay(),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.secondary.withAlpha(204),
                             letterSpacing: 0.1,
@@ -634,21 +635,21 @@ class DashboardScreen extends ConsumerWidget {
                         end: Alignment.bottomRight,
                         colors: isDark
                             ? const [
-                                Color(0xFF1E1A22),
-                                Color(0xFF17131B),
-                                Color(0xFF141018),
+                                Color(0xFF1E161C), // Deep Rose Charcoal
+                                Color(0xFF151016), // Deep Amethyst Black
+                                Color(0xFF0F0C10), // Midnight Obsidian
                               ]
                             : const [
-                                Color(0xFFFCFAFD),
-                                Color(0xFFF7F2F8),
-                                Color(0xFFF5EEF6),
+                                Color(0xFFFFFDFB), // Warm Ivory
+                                Color(0xFFFAF5FA), // Soft Lavender
+                                Color(0xFFF6EFF2), // Dusty Rose
                               ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(isDark ? 30 : 10),
-                          blurRadius: 36,
-                          offset: const Offset(0, 16),
+                          color: Colors.black.withAlpha(isDark ? 25 : 8),
+                          blurRadius: 40,
+                          offset: const Offset(0, 12),
                         ),
                       ],
                     ),
@@ -667,109 +668,79 @@ class DashboardScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // Stage Pill (tinted background, no pure white)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF2C1E22) : const Color(0xFFFFF2F5),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(color: scoreColor.withAlpha(isDark ? 40 : 25), width: 0.5),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      _getStageIcon(stage),
-                                      size: 14,
-                                      color: scoreColor,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      stage,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 11,
-                                        color: scoreColor,
-                                        letterSpacing: 0.1,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              _StageChip(
+                                stage: stage,
+                                scoreColor: scoreColor,
+                                icon: _getStageIcon(stage),
                               ),
                               const SizedBox(width: 10),
-                              // Score Pill (tinted background, no pure white)
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF201B24) : const Color(0xFFF8F2F8),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(
-                                    color: theme.colorScheme.outline.withAlpha(isDark ? 15 : 10),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                child: Text(
-                                  'Peace Index: ${recoveryScore.toInt()}%',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 11,
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                    letterSpacing: 0.1,
-                                  ),
-                                ),
-                              ),
+                              _PeaceIndexPill(score: recoveryScore),
                             ],
                           ),
                           const SizedBox(height: 20),
 
-                          // Dynamic Next Milestone Card (motivating visual support)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHighest.withAlpha(51),
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: theme.colorScheme.outline.withAlpha(15),
-                                width: 1,
+                          // Dynamic Next Milestone Card (motivating visual support with fade+scale on load)
+                          TweenAnimationBuilder<double>(
+                            tween: Tween<double>(begin: 0.0, end: 1.0),
+                            duration: const Duration(milliseconds: 800),
+                            curve: Curves.easeOutBack,
+                            builder: (context, value, child) {
+                              return Transform.scale(
+                                scale: 0.95 + 0.05 * value,
+                                child: Opacity(
+                                  opacity: value.clamp(0.0, 1.0),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surfaceContainerHighest.withAlpha(51),
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: theme.colorScheme.outline.withAlpha(15),
+                                  width: 1,
+                                ),
                               ),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.stars_rounded, color: Colors.amber, size: 20),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'NEXT MILESTONE',
-                                        style: theme.textTheme.labelSmall?.copyWith(
-                                          fontWeight: FontWeight.w800,
-                                          color: theme.colorScheme.secondary.withAlpha(180),
-                                          letterSpacing: 1.5,
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.stars_rounded, color: Colors.amber, size: 20),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'NEXT MILESTONE',
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                            color: theme.colorScheme.secondary.withAlpha(180),
+                                            letterSpacing: 1.5,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        nextMilestoneName,
-                                        style: theme.textTheme.bodyMedium?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                          color: theme.colorScheme.onSurface,
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          nextMilestoneName,
+                                          style: theme.textTheme.bodyMedium?.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: theme.colorScheme.onSurface,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  daysRemaining > 0 
-                                      ? '$daysRemaining ${daysRemaining == 1 ? 'day' : 'days'} left'
-                                      : 'Unlocked!',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: theme.colorScheme.primary,
+                                  Text(
+                                    daysRemaining > 0 
+                                        ? '$daysRemaining ${daysRemaining == 1 ? 'day' : 'days'} left'
+                                        : 'Unlocked!',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.colorScheme.primary,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -1554,19 +1525,19 @@ class _StreakProgressRingState extends State<_StreakProgressRing> with TickerPro
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Soft glowing backdrop (radial glow behind ring, 5% - 8% opacity)
+            // Ambient Radial Light behind the Ring
             Container(
-              width: 220,
-              height: 220,
+              width: 230,
+              height: 230,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    widget.scoreColor.withAlpha(isDark ? 18 : 12),
-                    widget.scoreColor.withAlpha(3),
+                    (isDark ? const Color(0xFFC8BBD8) : const Color(0xFFFFF2F5)).withAlpha(isDark ? 15 : 25),
+                    (isDark ? const Color(0xFFC8BBD8) : const Color(0xFFF3EFF5)).withAlpha(isDark ? 5 : 8),
                     Colors.transparent,
                   ],
-                  stops: const [0.0, 0.55, 1.0],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
             ),
@@ -1582,7 +1553,7 @@ class _StreakProgressRingState extends State<_StreakProgressRing> with TickerPro
                 painter: _SanctuarySunrisePainter(
                   primaryColor: widget.scoreColor,
                   secondaryColor: theme.colorScheme.secondary,
-                  backgroundColor: isDark ? const Color(0xFF1E1A22) : const Color(0xFFFCFAFD),
+                  backgroundColor: isDark ? const Color(0xFF1E161C) : const Color(0xFFFFFDFB),
                 ),
               ),
             ),
@@ -1612,30 +1583,30 @@ class _StreakProgressRingState extends State<_StreakProgressRing> with TickerPro
                 Text(
                   '${widget.streak}',
                   style: theme.textTheme.displayLarge?.copyWith(
-                    fontSize: 88,
-                    fontWeight: FontWeight.w100,
+                    fontSize: 72,
+                    fontWeight: FontWeight.w300,
                     color: theme.colorScheme.primary,
                     letterSpacing: -2,
                     height: 1.0,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
-                  widget.streak == 1 ? 'DAY' : 'DAYS',
+                  widget.streak == 1 ? 'Day Strong' : 'Days Strong',
                   style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: theme.colorScheme.secondary.withAlpha(200),
-                    letterSpacing: 4.0,
-                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.secondary,
+                    letterSpacing: 1.5,
+                    fontSize: 12,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
-                  'OF SPACE',
+                  'Keep Going',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    fontSize: 8,
-                    color: theme.colorScheme.secondary.withAlpha(120),
-                    letterSpacing: 2.0,
+                    fontSize: 9,
+                    color: theme.colorScheme.secondary.withAlpha(150),
+                    letterSpacing: 1.0,
                   ),
                 ),
               ],
@@ -1739,8 +1710,8 @@ class _StreakRingPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = min(size.width, size.height) / 2 - 8;
-    const strokeWidth = 8.0;
+    final radius = min(size.width, size.height) / 2 - 10;
+    const strokeWidth = 11.0;
 
     // 1. Draw base track
     final trackPaint = Paint()
@@ -1763,12 +1734,22 @@ class _StreakRingPainter extends CustomPainter {
       transform: GradientRotation(startAngle),
     );
 
-    // Glow Paint
+    // Glow Paint (with 40% reduced glow intensity/opacity)
+    final glowGradient = SweepGradient(
+      colors: [
+        startColor.withValues(alpha: startColor.a * 0.6),
+        endColor.withValues(alpha: endColor.a * 0.6),
+      ],
+      startAngle: 0.0,
+      endAngle: sweepAngle,
+      transform: GradientRotation(startAngle),
+    );
+
     final glowPaint = Paint()
       ..strokeWidth = strokeWidth + 4.0
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..shader = gradient.createShader(rect)
+      ..shader = glowGradient.createShader(rect)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
 
     // Progress Paint
@@ -1788,5 +1769,128 @@ class _StreakRingPainter extends CustomPainter {
         oldDelegate.baseColor != baseColor ||
         oldDelegate.startColor != startColor ||
         oldDelegate.endColor != endColor;
+  }
+}
+
+class _StageChip extends StatefulWidget {
+  final String stage;
+  final Color scoreColor;
+  final IconData icon;
+
+  const _StageChip({
+    required this.stage,
+    required this.scoreColor,
+    required this.icon,
+  });
+
+  @override
+  State<_StageChip> createState() => _StageChipState();
+}
+
+class _StageChipState extends State<_StageChip> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.15), weight: 50),
+      TweenSequenceItem(tween: Tween<double>(begin: 1.15, end: 1.0), weight: 50),
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant _StageChip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.stage != widget.stage) {
+      _controller.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF2C1E22) : const Color(0xFFFFF2F5),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: widget.scoreColor.withAlpha(isDark ? 40 : 25), width: 0.5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(widget.icon, size: 14, color: widget.scoreColor),
+            const SizedBox(width: 8),
+            Text(
+              widget.stage,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 11,
+                color: widget.scoreColor,
+                letterSpacing: 0.1,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PeaceIndexPill extends StatelessWidget {
+  final double score;
+
+  const _PeaceIndexPill({required this.score});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0.0, end: score),
+      duration: const Duration(milliseconds: 1500),
+      curve: Curves.easeOutCubic,
+      builder: (context, val, child) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF201B24) : const Color(0xFFF8F2F8),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: theme.colorScheme.outline.withAlpha(isDark ? 15 : 10),
+              width: 0.5,
+            ),
+          ),
+          child: Text(
+            'Peace Index: ${val.toInt()}%',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+              color: theme.colorScheme.onSurfaceVariant,
+              letterSpacing: 0.1,
+            ),
+          ),
+        );
+      },
+    );
   }
 }
