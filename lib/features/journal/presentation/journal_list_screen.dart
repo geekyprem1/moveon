@@ -177,7 +177,24 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
         heroTag: 'journal_fab',
         onPressed: () => context.go('/journal/new'),
         icon: const Icon(Icons.edit_rounded),
-        label: const Text('New Note', style: TextStyle(fontWeight: FontWeight.bold)),
+        label: const Text(
+          'New Note',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        elevation: 0,
+        highlightElevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(100),
+          side: BorderSide(
+            color: theme.colorScheme.primary.withAlpha(30),
+            width: 1,
+          ),
+        ),
+        backgroundColor: theme.colorScheme.primaryContainer,
+        foregroundColor: theme.colorScheme.onPrimaryContainer,
       ),
     );
   }
@@ -201,23 +218,23 @@ class _JournalCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16.0),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: theme.colorScheme.outline.withAlpha(20),
+          color: theme.colorScheme.outline.withAlpha(15),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(4),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: Colors.black.withAlpha(6),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(28.0),
           onTap: () => context.go('/journal/edit/${entry.id}'),
           child: Padding(
             padding: const EdgeInsets.all(20.0),

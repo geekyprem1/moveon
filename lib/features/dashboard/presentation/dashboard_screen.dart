@@ -160,24 +160,15 @@ class DashboardScreen extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(vertical: 6.0),
       decoration: BoxDecoration(
         color: isDone
-            ? theme.colorScheme.surfaceContainerHighest.withAlpha(64)
-            : theme.colorScheme.surface,
+            ? theme.colorScheme.primaryContainer.withAlpha(20)
+            : theme.colorScheme.surfaceContainerHighest.withAlpha(30),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isDone
-              ? theme.colorScheme.outline.withAlpha(10)
-              : theme.colorScheme.outline.withAlpha(25),
-          width: 1,
+              ? theme.colorScheme.primary.withAlpha(30)
+              : theme.colorScheme.onSurface.withAlpha(15),
+          width: 1.0,
         ),
-        boxShadow: isDone
-            ? []
-            : [
-                BoxShadow(
-                  color: Colors.black.withAlpha(4),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
@@ -185,8 +176,8 @@ class DashboardScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: isDone
-                ? theme.colorScheme.surfaceContainerHighest.withAlpha(153)
-                : theme.colorScheme.primaryContainer.withAlpha(51),
+                ? theme.colorScheme.primaryContainer.withAlpha(60)
+                : theme.colorScheme.primaryContainer.withAlpha(120),
             shape: BoxShape.circle,
           ),
           child: Text(
@@ -424,7 +415,7 @@ class DashboardScreen extends ConsumerWidget {
                       color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withAlpha(20),
+                        color: theme.colorScheme.onSurface.withAlpha(15),
                         width: 1,
                       ),
                       gradient: LinearGradient(
@@ -432,14 +423,14 @@ class DashboardScreen extends ConsumerWidget {
                         end: Alignment.bottomRight,
                         colors: [
                           theme.colorScheme.surface,
-                          theme.colorScheme.primaryContainer.withAlpha(10),
+                          theme.colorScheme.primaryContainer.withAlpha(5),
                         ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(5),
-                          blurRadius: 24,
-                          offset: const Offset(0, 8),
+                          color: Colors.black.withAlpha(4),
+                          blurRadius: 32,
+                          offset: const Offset(0, 12),
                         ),
                       ],
                     ),
@@ -447,69 +438,10 @@ class DashboardScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: 36.0, horizontal: 24.0),
                       child: Column(
                         children: [
-                          // Gigantic Circular Progress Ring (Instantly noticeable)
-                          Center(
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Outer Glow Ring Track
-                                SizedBox(
-                                  width: 200,
-                                  height: 200,
-                                  child: CircularProgressIndicator(
-                                    value: 1.0,
-                                    strokeWidth: 10,
-                                    color: theme.colorScheme.onSurface.withAlpha(13),
-                                  ),
-                                ),
-                                // Outer Active Progress Ring
-                                SizedBox(
-                                  width: 200,
-                                  height: 200,
-                                  child: CircularProgressIndicator(
-                                    value: recoveryScore / 100.0,
-                                    strokeWidth: 10,
-                                    color: scoreColor,
-                                    strokeCap: StrokeCap.round,
-                                  ),
-                                ),
-                                // Inner Content (Giant Streak Counter)
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '$streak',
-                                      style: theme.textTheme.displayLarge?.copyWith(
-                                        fontSize: 84, // Significantly larger
-                                        fontWeight: FontWeight.w200, // Thin premium weight
-                                        color: theme.colorScheme.primary,
-                                        letterSpacing: -2,
-                                        height: 1.0,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      streak == 1 ? 'DAY' : 'DAYS',
-                                      style: theme.textTheme.labelMedium?.copyWith(
-                                        fontWeight: FontWeight.w800,
-                                        color: theme.colorScheme.secondary.withAlpha(204),
-                                        letterSpacing: 3.0,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      'STREAK',
-                                      style: theme.textTheme.labelSmall?.copyWith(
-                                        fontSize: 9,
-                                        color: theme.colorScheme.secondary.withAlpha(128),
-                                        letterSpacing: 1.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                          _StreakProgressRing(
+                            streak: streak,
+                            recoveryScore: recoveryScore,
+                            scoreColor: scoreColor,
                           ),
                           const SizedBox(height: 28),
 
@@ -709,16 +641,16 @@ class DashboardScreen extends ConsumerWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withAlpha(20),
+                        color: theme.colorScheme.onSurface.withAlpha(15),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withAlpha(3),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
                         ),
                       ],
                     ),
@@ -822,16 +754,16 @@ class DashboardScreen extends ConsumerWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withAlpha(20),
+                        color: theme.colorScheme.onSurface.withAlpha(15),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withAlpha(3),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
                         ),
                       ],
                     ),
@@ -882,16 +814,16 @@ class DashboardScreen extends ConsumerWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: theme.colorScheme.secondary.withAlpha(20),
+                        color: theme.colorScheme.onSurface.withAlpha(15),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withAlpha(3),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
                         ),
                       ],
                     ),
@@ -899,7 +831,7 @@ class DashboardScreen extends ConsumerWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: () => ref.read(activeTabProvider.notifier).state = 1,
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(28),
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: Row(
@@ -957,16 +889,16 @@ class DashboardScreen extends ConsumerWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: sosBg,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: sosBorder,
-                        width: 1,
+                        color: sosBorder.withAlpha(80),
+                        width: 1.2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(5),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withAlpha(3),
+                          blurRadius: 24,
+                          offset: const Offset(0, 8),
                         ),
                       ],
                     ),
@@ -1174,11 +1106,11 @@ class _MoodOption extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final borderCol = isSelected
-        ? theme.colorScheme.primary.withAlpha(128)
-        : Colors.transparent;
+        ? theme.colorScheme.primary.withAlpha(120)
+        : theme.colorScheme.onSurface.withAlpha(15);
     final bgCol = isSelected
-        ? theme.colorScheme.primaryContainer.withAlpha(153)
-        : theme.colorScheme.surfaceContainerHighest.withAlpha(77);
+        ? theme.colorScheme.primaryContainer.withAlpha(120)
+        : theme.colorScheme.surfaceContainerHighest.withAlpha(45);
 
     return Expanded(
       child: GestureDetector(
@@ -1196,7 +1128,7 @@ class _MoodOption extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: borderCol,
-                width: isSelected ? 2.0 : 0.0,
+                width: isSelected ? 1.5 : 1.0,
               ),
               boxShadow: isSelected
                   ? [
@@ -1229,6 +1161,131 @@ class _MoodOption extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StreakProgressRing extends StatefulWidget {
+  final int streak;
+  final double recoveryScore;
+  final Color scoreColor;
+
+  const _StreakProgressRing({
+    required this.streak,
+    required this.recoveryScore,
+    required this.scoreColor,
+  });
+
+  @override
+  State<_StreakProgressRing> createState() => _StreakProgressRingState();
+}
+
+class _StreakProgressRingState extends State<_StreakProgressRing> with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 0.98, end: 1.02).animate(
+      CurvedAnimation(
+        parent: _pulseController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ScaleTransition(
+      scale: _scaleAnimation,
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    widget.scoreColor.withAlpha(35),
+                    widget.scoreColor.withAlpha(5),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.6, 1.0],
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 190,
+              height: 190,
+              child: CircularProgressIndicator(
+                value: 1.0,
+                strokeWidth: 8,
+                color: theme.colorScheme.onSurface.withAlpha(15),
+              ),
+            ),
+            SizedBox(
+              width: 190,
+              height: 190,
+              child: CircularProgressIndicator(
+                value: widget.recoveryScore / 100.0,
+                strokeWidth: 8,
+                color: widget.scoreColor,
+                strokeCap: StrokeCap.round,
+              ),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${widget.streak}',
+                  style: theme.textTheme.displayLarge?.copyWith(
+                    fontSize: 88,
+                    fontWeight: FontWeight.w100,
+                    color: theme.colorScheme.primary,
+                    letterSpacing: -2,
+                    height: 1.0,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.streak == 1 ? 'DAY' : 'DAYS',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: theme.colorScheme.secondary.withAlpha(200),
+                    letterSpacing: 4.0,
+                    fontSize: 10,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'NO CONTACT',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontSize: 8,
+                    color: theme.colorScheme.secondary.withAlpha(120),
+                    letterSpacing: 2.0,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

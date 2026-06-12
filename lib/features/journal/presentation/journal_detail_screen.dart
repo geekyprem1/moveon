@@ -142,6 +142,7 @@ class _JournalDetailScreenState extends ConsumerState<JournalDetailScreen> {
   Widget build(BuildContext context) {
     final controllerState = ref.watch(journalControllerProvider);
     final isLoading = controllerState.isLoading;
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -154,7 +155,7 @@ class _JournalDetailScreenState extends ConsumerState<JournalDetailScreen> {
             IconButton(
               icon: const Icon(Icons.delete_outline),
               tooltip: 'Delete Note',
-              color: Theme.of(context).colorScheme.error,
+              color: theme.colorScheme.error,
               onPressed: isLoading ? null : _delete,
             ),
           IconButton(
@@ -170,20 +171,25 @@ class _JournalDetailScreenState extends ConsumerState<JournalDetailScreen> {
             : Form(
                 key: _formKey,
                 child: Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 20.0),
                   child: Column(
                     children: [
                       // Title Text Field
                       TextFormField(
                         controller: _titleController,
                         textCapitalization: TextCapitalization.sentences,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                        decoration: const InputDecoration(
-                          hintText: 'Title',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Title your thoughts',
                           border: InputBorder.none,
-                          hintStyle: TextStyle(color: Colors.grey),
+                          hintStyle: TextStyle(
+                            color: theme.colorScheme.onSurface.withAlpha(80),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -192,7 +198,7 @@ class _JournalDetailScreenState extends ConsumerState<JournalDetailScreen> {
                           return null;
                         },
                       ),
-                      const Divider(),
+                      const SizedBox(height: 16),
 
                       // Note Text Field
                       Expanded(
@@ -201,11 +207,17 @@ class _JournalDetailScreenState extends ConsumerState<JournalDetailScreen> {
                           keyboardType: TextInputType.multiline,
                           maxLines: null,
                           textCapitalization: TextCapitalization.sentences,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                          decoration: const InputDecoration(
-                            hintText: 'Write down your thoughts, cravings, or wins...',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            height: 1.6,
+                            color: theme.colorScheme.onSurface.withAlpha(220),
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'How are you holding up in this moment? Write freely...',
                             border: InputBorder.none,
-                            hintStyle: TextStyle(color: Colors.grey),
+                            hintStyle: TextStyle(
+                              color: theme.colorScheme.onSurface.withAlpha(80),
+                              height: 1.6,
+                            ),
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {

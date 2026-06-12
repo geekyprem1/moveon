@@ -15,6 +15,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      scaffoldBackgroundColor: AppColors.lightBackground,
       colorScheme: const ColorScheme.light(
         primary: AppColors.lightPrimary,
         onPrimary: AppColors.lightOnPrimary,
@@ -31,11 +32,18 @@ class AppTheme {
         elevation: 0,
         color: AppColors.lightSurface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(28),
           side: BorderSide(
-            color: Colors.grey.shade200,
-            width: 1,
+            color: AppColors.lightOnSurface.withAlpha(20),
+            width: 1.0,
           ),
+        ),
+      ),
+      dialogTheme: DialogTheme(
+        backgroundColor: AppColors.lightSurface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
         ),
       ),
       appBarTheme: const AppBarTheme(
@@ -46,7 +54,7 @@ class AppTheme {
       ),
       dividerTheme: DividerThemeData(
         thickness: 1,
-        color: Colors.grey.shade100,
+        color: AppColors.lightOnSurface.withAlpha(15),
       ),
     );
   }
@@ -55,6 +63,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
+      scaffoldBackgroundColor: AppColors.darkBackground,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.darkPrimary,
         onPrimary: AppColors.darkOnPrimary,
@@ -71,11 +80,18 @@ class AppTheme {
         elevation: 0,
         color: AppColors.darkSurface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(28),
           side: BorderSide(
-            color: Colors.grey.shade900,
-            width: 1,
+            color: AppColors.darkOnSurface.withAlpha(20),
+            width: 1.0,
           ),
+        ),
+      ),
+      dialogTheme: DialogTheme(
+        backgroundColor: AppColors.darkSurface,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
         ),
       ),
       appBarTheme: const AppBarTheme(
@@ -86,19 +102,19 @@ class AppTheme {
       ),
       dividerTheme: DividerThemeData(
         thickness: 1,
-        color: Colors.grey.shade900,
+        color: AppColors.darkOnSurface.withAlpha(15),
       ),
     );
   }
 
   static ThemeData get lightSakuraTheme {
     return lightTheme.copyWith(
-      colorScheme: const ColorScheme.light(
-        primary: Color(0xFFE91E63), // Pink
+      colorScheme: lightTheme.colorScheme.copyWith(
+        primary: const Color(0xFFC76D8A), // Soft pink
         onPrimary: Colors.white,
-        primaryContainer: Color(0xFFFCE4EC), // Light Pink Container
-        onPrimaryContainer: Color(0xFF880E4F),
-        secondary: Color(0xFF880E4F),
+        primaryContainer: const Color(0xFFFAF0F2), // Very soft warm pink container
+        onPrimaryContainer: const Color(0xFF673243),
+        secondary: const Color(0xFF673243),
         onSecondary: Colors.white,
       ),
     );
@@ -106,13 +122,13 @@ class AppTheme {
 
   static ThemeData get darkSakuraTheme {
     return darkTheme.copyWith(
-      colorScheme: const ColorScheme.dark(
-        primary: Color(0xFFFF80AB), // Pink glow
-        onPrimary: Color(0xFF880E4F),
-        primaryContainer: Color(0xFF880E4F),
-        onPrimaryContainer: Color(0xFFFF80AB),
-        secondary: Color(0xFFFF80AB),
-        onSecondary: Color(0xFF880E4F),
+      colorScheme: darkTheme.colorScheme.copyWith(
+        primary: const Color(0xFFF3B8C9), // Light glowing pink
+        onPrimary: const Color(0xFF673243),
+        primaryContainer: const Color(0xFF381C25),
+        onPrimaryContainer: const Color(0xFFF3B8C9),
+        secondary: const Color(0xFFF3B8C9),
+        onSecondary: const Color(0xFF673243),
       ),
     );
   }

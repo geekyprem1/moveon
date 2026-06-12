@@ -98,50 +98,98 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28.0)),
       ),
       builder: (context) {
         final theme = Theme.of(context);
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 28.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
                   '🔒 Seal in Time Capsule',
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 12),
                 Text(
                   'This letter will be locked. You will NOT be able to open, read, or edit it until the selected duration ends to protect your emotional distance.',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.secondary),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.secondary.withAlpha(180),
+                    height: 1.4,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () => _lockLetter(30),
-                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                  child: const Text('Lock for 30 Days', style: TextStyle(fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    foregroundColor: theme.colorScheme.onPrimaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
+                      side: BorderSide(
+                        color: theme.colorScheme.primary.withAlpha(30),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: const Text('Lock for 30 Days', style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.5)),
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () => _lockLetter(90),
-                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                  child: const Text('Lock for 90 Days', style: TextStyle(fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    foregroundColor: theme.colorScheme.onPrimaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
+                      side: BorderSide(
+                        color: theme.colorScheme.primary.withAlpha(30),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: const Text('Lock for 90 Days', style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.5)),
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton(
                   onPressed: () => _lockLetter(180),
-                  style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                  child: const Text('Lock for 180 Days', style: TextStyle(fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    foregroundColor: theme.colorScheme.onPrimaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100),
+                      side: BorderSide(
+                        color: theme.colorScheme.primary.withAlpha(30),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: const Text('Lock for 180 Days', style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.5)),
                 ),
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.secondary,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -246,7 +294,7 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
           ? const Center(child: CircularProgressIndicator())
           : SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -254,43 +302,64 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                     children: [
                       // Guidance Text
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primaryContainer.withAlpha(25),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: theme.colorScheme.primary.withAlpha(40)),
+                          color: theme.colorScheme.primaryContainer.withAlpha(30),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: theme.colorScheme.primary.withAlpha(20),
+                            width: 1,
+                          ),
                         ),
                         child: Row(
                           children: [
                             const Text('💡', style: TextStyle(fontSize: 20)),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 'These words are for your own healing, not for them. Write honestly, release fully.',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onPrimaryContainer,
+                                  height: 1.3,
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
                       // Category Selector
                       Text(
                         'Letter Category',
-                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
                       Wrap(
                         spacing: 8.0,
+                        runSpacing: 8.0,
                         children: _categories.map((cat) {
                           final isSelected = _selectedCategory == cat['name'];
                           return ChoiceChip(
                             label: Text('${cat['emoji']} ${cat['name']}'),
                             selected: isSelected,
-                            selectedColor: cat['color'].withAlpha(40),
+                            selectedColor: cat['color'].withAlpha(isSelected ? 30 : 10),
+                            labelStyle: TextStyle(
+                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.secondary,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100),
+                              side: BorderSide(
+                                color: isSelected 
+                                    ? theme.colorScheme.primary.withAlpha(40) 
+                                    : theme.colorScheme.outline.withAlpha(15),
+                                width: 1,
+                              ),
+                            ),
                             onSelected: (selected) {
                               if (selected) {
                                 setState(() {
@@ -301,16 +370,23 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                           );
                         }).toList(),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
                       // Title input
                       TextFormField(
                         controller: _titleController,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                        decoration: const InputDecoration(
-                          labelText: 'Title / Feeling (e.g. Closure I need)',
-                          border: OutlineInputBorder(),
-                          hintText: 'Enter title...',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Title your letter (e.g. Closure I need)',
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            color: theme.colorScheme.onSurface.withAlpha(80),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -319,6 +395,8 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                           return null;
                         },
                       ),
+                      const SizedBox(height: 8),
+                      const Divider(),
                       const SizedBox(height: 16),
 
                       // Content Input
@@ -326,11 +404,17 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                         controller: _contentController,
                         maxLines: 12,
                         minLines: 6,
-                        decoration: const InputDecoration(
-                          labelText: 'Write your heart out...',
-                          alignLabelWithHint: true,
-                          border: OutlineInputBorder(),
-                          hintText: 'Type what you want to say but never send...',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          height: 1.6,
+                          color: theme.colorScheme.onSurface.withAlpha(220),
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Write your heart out. Let it all flow here...',
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            color: theme.colorScheme.onSurface.withAlpha(80),
+                            height: 1.6,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -352,8 +436,16 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                               label: const Text('Time Capsule'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 14),
+                                elevation: 0,
                                 backgroundColor: theme.colorScheme.secondaryContainer,
                                 foregroundColor: theme.colorScheme.onSecondaryContainer,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(100),
+                                  side: BorderSide(
+                                    color: theme.colorScheme.secondary.withAlpha(20),
+                                    width: 1,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -366,8 +458,16 @@ class _LetterComposeScreenState extends ConsumerState<LetterComposeScreen> {
                               label: const Text('Burn Letter'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 14),
-                                backgroundColor: Colors.red.shade900,
-                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                backgroundColor: theme.colorScheme.errorContainer,
+                                foregroundColor: theme.colorScheme.onErrorContainer,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(100),
+                                  side: BorderSide(
+                                    color: theme.colorScheme.error.withAlpha(20),
+                                    width: 1,
+                                  ),
+                                ),
                               ),
                             ),
                           ),

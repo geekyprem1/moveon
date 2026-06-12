@@ -108,16 +108,16 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withAlpha(20),
+                        color: theme.colorScheme.outline.withAlpha(15),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withAlpha(6),
+                          blurRadius: 32,
+                          offset: const Offset(0, 12),
                         ),
                       ],
                     ),
@@ -173,16 +173,16 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withAlpha(20),
+                        color: theme.colorScheme.outline.withAlpha(15),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withAlpha(6),
+                          blurRadius: 32,
+                          offset: const Offset(0, 12),
                         ),
                       ],
                     ),
@@ -234,16 +234,16 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withAlpha(20),
+                        color: theme.colorScheme.outline.withAlpha(15),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withAlpha(6),
+                          blurRadius: 32,
+                          offset: const Offset(0, 12),
                         ),
                       ],
                     ),
@@ -301,16 +301,16 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withAlpha(20),
+                        color: theme.colorScheme.outline.withAlpha(15),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withAlpha(6),
+                          blurRadius: 32,
+                          offset: const Offset(0, 12),
                         ),
                       ],
                     ),
@@ -367,16 +367,16 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                   Container(
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: theme.colorScheme.outline.withAlpha(20),
+                        color: theme.colorScheme.outline.withAlpha(15),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(4),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withAlpha(6),
+                          blurRadius: 32,
+                          offset: const Offset(0, 12),
                         ),
                       ],
                     ),
@@ -432,13 +432,13 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
 
   Widget _buildStatItem(String label, String value, Color color, ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
-        color: color.withAlpha(15),
-        borderRadius: BorderRadius.circular(20),
+        color: color.withAlpha(8),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: color.withAlpha(40),
-          width: 1,
+          color: color.withAlpha(20),
+          width: 1.0,
         ),
       ),
       child: Column(
@@ -448,21 +448,22 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
           Text(
             label.toUpperCase(),
             style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.secondary.withAlpha(180),
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.0,
+              color: theme.colorScheme.secondary.withAlpha(140),
+              fontWeight: FontWeight.w500,
+              letterSpacing: 1.5,
+              fontSize: 9,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             value,
             style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w300,
               color: color,
-              fontSize: 18,
-              letterSpacing: -0.5,
+              fontSize: 20,
+              letterSpacing: 0.5,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -516,17 +517,26 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
   }
 
   Widget _buildBadgeWidget(BuildContext context, BadgeDefinition badge, bool isUnlocked, ThemeData theme) {
-    final double opacity = isUnlocked ? 1.0 : 0.35;
     return Container(
       decoration: BoxDecoration(
-        color: isUnlocked 
-            ? theme.colorScheme.primaryContainer.withAlpha(40) 
-            : theme.colorScheme.surfaceContainerHighest.withAlpha(51),
-        borderRadius: BorderRadius.circular(24),
+        gradient: isUnlocked
+            ? LinearGradient(
+                colors: [
+                  theme.colorScheme.primary.withAlpha(25),
+                  theme.colorScheme.secondary.withAlpha(15),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: isUnlocked
+            ? null
+            : theme.colorScheme.onSurface.withAlpha(8),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isUnlocked 
-              ? theme.colorScheme.primary.withAlpha(64) 
-              : theme.colorScheme.outline.withAlpha(15),
+          color: isUnlocked
+              ? theme.colorScheme.primary.withAlpha(40)
+              : theme.colorScheme.outline.withAlpha(10),
           width: 1,
         ),
       ),
@@ -542,44 +552,29 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                   );
                 }
               : null,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Text(
-                      badge.emoji,
-                      style: const TextStyle(fontSize: 36).copyWith(color: isUnlocked ? null : Colors.grey.withValues(alpha: opacity)),
-                    ),
-                    if (!isUnlocked)
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withAlpha(128),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.lock_rounded,
-                          color: Colors.white,
-                          size: 14,
-                        ),
-                      ),
-                  ],
+                Opacity(
+                  opacity: isUnlocked ? 1.0 : 0.25,
+                  child: Text(
+                    badge.emoji,
+                    style: const TextStyle(fontSize: 36),
+                  ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 Text(
                   badge.title,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: isUnlocked 
-                        ? theme.colorScheme.primary 
-                        : theme.colorScheme.secondary.withValues(alpha: opacity),
+                    fontWeight: isUnlocked ? FontWeight.w700 : FontWeight.w500,
+                    color: isUnlocked
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.secondary.withAlpha(128),
                     letterSpacing: -0.1,
                   ),
                   maxLines: 2,
@@ -599,16 +594,16 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: theme.colorScheme.outline.withAlpha(20),
+          color: theme.colorScheme.outline.withAlpha(15),
           width: 1,
-                    ),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(4),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: Colors.black.withAlpha(6),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
@@ -710,11 +705,18 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
                   );
                 },
                 icon: const Icon(Icons.group_add_rounded, size: 18),
-                label: const Text('Enter Friend’s Code', style: TextStyle(fontWeight: FontWeight.bold)),
+                label: const Text('Enter Friend’s Code', style: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.5)),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
+                  elevation: 0,
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  foregroundColor: theme.colorScheme.onPrimaryContainer,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(100),
+                    side: BorderSide(
+                      color: theme.colorScheme.primary.withAlpha(30),
+                      width: 1,
+                    ),
                   ),
                 ),
               ),
@@ -973,16 +975,16 @@ class _ProfileStatsScreenState extends ConsumerState<ProfileStatsScreen> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: theme.colorScheme.outline.withAlpha(20),
+          color: theme.colorScheme.outline.withAlpha(15),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(4),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: Colors.black.withAlpha(6),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
