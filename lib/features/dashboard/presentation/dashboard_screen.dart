@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -75,13 +76,26 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   void _showEmergencySupport(BuildContext context, WidgetRef ref, int streak, double score) {
-    showDialog(
+    showGeneralDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) {
+      barrierLabel: 'Sanctuary',
+      barrierColor: Colors.black.withAlpha(150),
+      transitionDuration: const Duration(milliseconds: 450),
+      pageBuilder: (context, anim1, anim2) {
         return EmergencyDialog(
           streakDays: streak,
           recoveryScore: score,
+        );
+      },
+      transitionBuilder: (context, anim, secondaryAnim, child) {
+        final curve = CurvedAnimation(parent: anim, curve: Curves.easeOutBack);
+        return ScaleTransition(
+          scale: curve,
+          child: FadeTransition(
+            opacity: anim,
+            child: child,
+          ),
         );
       },
     );
@@ -346,7 +360,16 @@ class DashboardScreen extends ConsumerWidget {
             }
           },
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) {
+              return ScaleTransition(
+                scale: animation,
+                child: FadeTransition(
+                  opacity: animation,
+                  child: child,
+                ),
+              );
+            },
             child: isDone
                 ? Container(
                     key: const ValueKey('done'),
@@ -546,9 +569,22 @@ class DashboardScreen extends ConsumerWidget {
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeOutCubic,
+                builder: (context, animValue, child) {
+                  return Opacity(
+                    opacity: animValue,
+                    child: Transform.translate(
+                      offset: Offset(0, 30 * (1.0 - animValue)),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                   // 1. Welcome Greeting Header (Calm/Stoic Warm greeting style)
                   Padding(
                     padding: const EdgeInsets.only(left: 4.0, bottom: 28.0, top: 4.0),
@@ -588,25 +624,31 @@ class DashboardScreen extends ConsumerWidget {
                   // 2. Hero Progress Ring & Recovery Card Container
                   Container(
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(
-                        color: theme.colorScheme.onSurface.withAlpha(15),
-                        width: 1,
+                        color: theme.colorScheme.onSurface.withAlpha(isDark ? 8 : 4),
+                        width: 0.5,
                       ),
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [
-                          theme.colorScheme.surface,
-                          theme.colorScheme.primaryContainer.withAlpha(5),
-                        ],
+                        colors: isDark
+                            ? const [
+                                Color(0xFF1E1A22),
+                                Color(0xFF17131B),
+                                Color(0xFF141018),
+                              ]
+                            : const [
+                                Color(0xFFFCFAFD),
+                                Color(0xFFF7F2F8),
+                                Color(0xFFF5EEF6),
+                              ],
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withAlpha(4),
-                          blurRadius: 32,
-                          offset: const Offset(0, 12),
+                          color: Colors.black.withAlpha(isDark ? 30 : 10),
+                          blurRadius: 36,
+                          offset: const Offset(0, 16),
                         ),
                       ],
                     ),
@@ -625,13 +667,13 @@ class DashboardScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // Stage Pill
+                              // Stage Pill (tinted background, no pure white)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: scoreColor.withAlpha(20),
+                                  color: isDark ? const Color(0xFF2C1E22) : const Color(0xFFFFF2F5),
                                   borderRadius: BorderRadius.circular(24),
-                                  border: Border.all(color: scoreColor.withAlpha(51), width: 1),
+                                  border: Border.all(color: scoreColor.withAlpha(isDark ? 40 : 25), width: 0.5),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -655,15 +697,15 @@ class DashboardScreen extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              // Score Pill
+                              // Score Pill (tinted background, no pure white)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                 decoration: BoxDecoration(
-                                  color: theme.colorScheme.surfaceContainerHighest.withAlpha(128),
+                                  color: isDark ? const Color(0xFF201B24) : const Color(0xFFF8F2F8),
                                   borderRadius: BorderRadius.circular(24),
                                   border: Border.all(
-                                    color: theme.colorScheme.outline.withAlpha(20),
-                                    width: 1,
+                                    color: theme.colorScheme.outline.withAlpha(isDark ? 15 : 10),
+                                    width: 0.5,
                                   ),
                                 ),
                                 child: Text(
@@ -1356,7 +1398,8 @@ class DashboardScreen extends ConsumerWidget {
                 ],
               ),
             ),
-          );
+          ),
+        );
         },
       ),
     );
@@ -1390,7 +1433,7 @@ class _MoodOption extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedScale(
-          scale: isSelected ? 1.12 : 1.0,
+          scale: isSelected ? 1.08 : 1.0,
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutBack,
           child: AnimatedContainer(
@@ -1407,9 +1450,9 @@ class _MoodOption extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: theme.colorScheme.primary.withAlpha(38),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
+                        color: theme.colorScheme.primary.withAlpha(25),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
                       )
                     ]
                   : [],
@@ -1456,9 +1499,11 @@ class _StreakProgressRing extends StatefulWidget {
   State<_StreakProgressRing> createState() => _StreakProgressRingState();
 }
 
-class _StreakProgressRingState extends State<_StreakProgressRing> with SingleTickerProviderStateMixin {
+class _StreakProgressRingState extends State<_StreakProgressRing> with TickerProviderStateMixin {
   late final AnimationController _pulseController;
   late final Animation<double> _scaleAnimation;
+  late final AnimationController _progressController;
+  late final Animation<double> _progressAnimation;
 
   @override
   void initState() {
@@ -1474,36 +1519,54 @@ class _StreakProgressRingState extends State<_StreakProgressRing> with SingleTic
         curve: Curves.easeInOut,
       ),
     );
+
+    _progressController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _progressAnimation = Tween<double>(
+      begin: 0.0,
+      end: widget.recoveryScore / 100.0,
+    ).animate(CurvedAnimation(
+      parent: _progressController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _progressController.forward();
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
+    _progressController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bool isDark = theme.brightness == Brightness.dark;
+    
     return ScaleTransition(
       scale: _scaleAnimation,
       child: Center(
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Soft glowing backdrop
+            // Soft glowing backdrop (radial glow behind ring, 5% - 8% opacity)
             Container(
-              width: 200,
-              height: 200,
+              width: 220,
+              height: 220,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    widget.scoreColor.withAlpha(25),
-                    widget.scoreColor.withAlpha(5),
+                    widget.scoreColor.withAlpha(isDark ? 18 : 12),
+                    widget.scoreColor.withAlpha(3),
                     Colors.transparent,
                   ],
-                  stops: const [0.0, 0.6, 1.0],
+                  stops: const [0.0, 0.55, 1.0],
                 ),
               ),
             ),
@@ -1519,28 +1582,29 @@ class _StreakProgressRingState extends State<_StreakProgressRing> with SingleTic
                 painter: _SanctuarySunrisePainter(
                   primaryColor: widget.scoreColor,
                   secondaryColor: theme.colorScheme.secondary,
-                  backgroundColor: theme.colorScheme.surface,
+                  backgroundColor: isDark ? const Color(0xFF1E1A22) : const Color(0xFFFCFAFD),
                 ),
               ),
             ),
-            SizedBox(
-              width: 190,
-              height: 190,
-              child: CircularProgressIndicator(
-                value: 1.0,
-                strokeWidth: 8,
-                color: theme.colorScheme.onSurface.withAlpha(15),
-              ),
-            ),
-            SizedBox(
-              width: 190,
-              height: 190,
-              child: CircularProgressIndicator(
-                value: widget.recoveryScore / 100.0,
-                strokeWidth: 8,
-                color: widget.scoreColor,
-                strokeCap: StrokeCap.round,
-              ),
+            // Animated Custom Paint Progress Ring (Gradient progress stroke, soft glow)
+            AnimatedBuilder(
+              animation: _progressAnimation,
+              builder: (context, child) {
+                final startColor = widget.scoreColor;
+                final endColor = Color.lerp(widget.scoreColor, Colors.white, isDark ? 0.35 : 0.25) ?? widget.scoreColor;
+                return SizedBox(
+                  width: 192,
+                  height: 192,
+                  child: CustomPaint(
+                    painter: _StreakRingPainter(
+                      progress: _progressAnimation.value,
+                      baseColor: theme.colorScheme.onSurface.withAlpha(isDark ? 18 : 12),
+                      startColor: startColor,
+                      endColor: endColor,
+                    ),
+                  ),
+                );
+              },
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -1657,4 +1721,72 @@ class _SanctuarySunrisePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _SanctuarySunrisePainter oldDelegate) => false;
+}
+
+class _StreakRingPainter extends CustomPainter {
+  final double progress;
+  final Color baseColor;
+  final Color startColor;
+  final Color endColor;
+
+  _StreakRingPainter({
+    required this.progress,
+    required this.baseColor,
+    required this.startColor,
+    required this.endColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = min(size.width, size.height) / 2 - 8;
+    const strokeWidth = 8.0;
+
+    // 1. Draw base track
+    final trackPaint = Paint()
+      ..color = baseColor
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+    canvas.drawCircle(center, radius, trackPaint);
+
+    if (progress <= 0) return;
+
+    // 2. Draw progress arc with sweep gradient
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final sweepAngle = 2 * pi * progress;
+    final startAngle = -pi / 2;
+
+    final gradient = SweepGradient(
+      colors: [startColor, endColor],
+      startAngle: 0.0,
+      endAngle: sweepAngle,
+      transform: GradientRotation(startAngle),
+    );
+
+    // Glow Paint
+    final glowPaint = Paint()
+      ..strokeWidth = strokeWidth + 4.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..shader = gradient.createShader(rect)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+
+    // Progress Paint
+    final progressPaint = Paint()
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..shader = gradient.createShader(rect);
+
+    canvas.drawArc(rect, startAngle, sweepAngle, false, glowPaint);
+    canvas.drawArc(rect, startAngle, sweepAngle, false, progressPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _StreakRingPainter oldDelegate) {
+    return oldDelegate.progress != progress ||
+        oldDelegate.baseColor != baseColor ||
+        oldDelegate.startColor != startColor ||
+        oldDelegate.endColor != endColor;
+  }
 }

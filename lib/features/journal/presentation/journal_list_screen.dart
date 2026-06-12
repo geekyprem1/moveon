@@ -204,45 +204,64 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
   }
 }
 
-class _JournalCard extends ConsumerWidget {
+class _JournalCard extends ConsumerStatefulWidget {
   final JournalEntry entry;
 
   const _JournalCard({required this.entry});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_JournalCard> createState() => _JournalCardState();
+}
+
+class _JournalCardState extends ConsumerState<_JournalCard> {
+  bool _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     // Limit snippet to 3 lines
-    final snippet = entry.note.length > 120
-        ? '${entry.note.substring(0, 120)}...'
-        : entry.note;
+    final snippet = widget.entry.note.length > 120
+        ? '${widget.entry.note.substring(0, 120)}...'
+        : widget.entry.note;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: theme.colorScheme.outline.withAlpha(15),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(6),
-            blurRadius: 32,
-            offset: const Offset(0, 12),
+    final double scale = _isPressed ? 0.98 : 1.0;
+    final double shadowOpacity = _isPressed ? (isDark ? 0.18 : 0.08) : (isDark ? 0.12 : 0.04);
+    final double blurRadius = _isPressed ? 16.0 : 32.0;
+    final Offset offset = _isPressed ? const Offset(0, 4) : const Offset(0, 12);
+
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: () {
+        ref.read(hapticServiceProvider).selection();
+        context.go('/journal/edit/${widget.entry.id}');
+      },
+      child: AnimatedScale(
+        scale: scale,
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOutCubic,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOutCubic,
+          margin: const EdgeInsets.only(bottom: 16.0),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: theme.colorScheme.outline.withAlpha(isDark ? 10 : 15),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: shadowOpacity),
+                blurRadius: blurRadius,
+                offset: offset,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(28.0),
-          onTap: () {
-            ref.read(hapticServiceProvider).selection();
-            context.go('/journal/edit/${entry.id}');
-          },
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -254,7 +273,7 @@ class _JournalCard extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        entry.title.isEmpty ? 'Untitled Entry' : entry.title,
+                        widget.entry.title.isEmpty ? 'Untitled Entry' : widget.entry.title,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
@@ -266,9 +285,9 @@ class _JournalCard extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     Icon(
-                      entry.isSynced ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
+                      widget.entry.isSynced ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
                       size: 16,
-                      color: entry.isSynced
+                      color: widget.entry.isSynced
                           ? theme.colorScheme.primary.withAlpha(150)
                           : theme.colorScheme.secondary.withAlpha(150),
                     ),
@@ -278,7 +297,7 @@ class _JournalCard extends ConsumerWidget {
 
                 // Date
                 Text(
-                  DateFormatter.formatDate(entry.date),
+                  DateFormatter.formatDate(widget.entry.date),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.secondary.withAlpha(180),
                     fontWeight: FontWeight.w500,
