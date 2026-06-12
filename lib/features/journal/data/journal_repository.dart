@@ -27,8 +27,11 @@ class JournalRepository {
   }
 
   /// Watch local journals (using Hive box stream)
-  Stream<List<JournalEntry>> watchLocalJournals() {
-    return _box.watch().map((_) => getLocalJournals());
+  Stream<List<JournalEntry>> watchLocalJournals() async* {
+    yield getLocalJournals();
+    await for (final _ in _box.watch()) {
+      yield getLocalJournals();
+    }
   }
 
   /// Save / Update Journal entry (Offline-first)

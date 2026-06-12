@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
 
 class AppTheme {
@@ -51,6 +52,11 @@ class AppTheme {
         centerTitle: false,
         backgroundColor: Colors.transparent,
         scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
+        ),
       ),
       dividerTheme: DividerThemeData(
         thickness: 1,
@@ -99,6 +105,11 @@ class AppTheme {
         centerTitle: false,
         backgroundColor: Colors.transparent,
         scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
       ),
       dividerTheme: DividerThemeData(
         thickness: 1,
