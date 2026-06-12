@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../constants/app_colors.dart';
@@ -138,15 +139,7 @@ class DashboardScreen extends ConsumerWidget {
     }
   }
 
-  int _getCompletedCount(Set<String> completedTasks) {
-    int count = 0;
-    for (var task in AppTasks.defaultTasks) {
-      if (completedTasks.contains(task.id)) {
-        count++;
-      }
-    }
-    return count;
-  }
+
 
   Widget _buildCategoryHeader(BuildContext context, String title, String emoji, ThemeData theme) {
     return Padding(
@@ -292,7 +285,30 @@ class DashboardScreen extends ConsumerWidget {
         ),
         trailing: GestureDetector(
           onTap: () {
-            ref.read(dashboardControllerProvider.notifier).toggleTask(task.id, !isDone);
+            HapticFeedback.lightImpact();
+            final nextState = !isDone;
+            ref.read(dashboardControllerProvider.notifier).toggleTask(task.id, nextState);
+            if (nextState) {
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Text('✨', style: TextStyle(fontSize: 16)),
+                      const SizedBox(width: 8),
+                      Text('+5 Healing XP Earned (${task.completedVerb}!)'),
+                    ],
+                  ),
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                  width: 280,
+                  backgroundColor: Colors.teal,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              );
+            }
           },
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
@@ -387,6 +403,14 @@ class DashboardScreen extends ConsumerWidget {
 
           final moodHistory = moodHistoryAsync.value ?? [];
           final completedTasks = completedTasksAsync.value ?? {};
+
+          final todayRituals = AppTasks.getDailyRituals(DateTime.now());
+          int completedCount = 0;
+          for (var task in todayRituals) {
+            if (completedTasks.contains(task.id)) {
+              completedCount++;
+            }
+          }
 
           // Calculations
           final int streak = user.noContactStreak;
@@ -893,11 +917,11 @@ class DashboardScreen extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Daily Healing Rituals',
+                                "Today's Healing Journey",
                                 style: theme.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w900,
                                   fontSize: 18,
-                                  letterSpacing: -0.2,
+                                  letterSpacing: -0.3,
                                 ),
                               ),
                               Container(
@@ -907,7 +931,7 @@ class DashboardScreen extends ConsumerWidget {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
-                                  '${_getCompletedCount(completedTasks)} / ${AppTasks.defaultTasks.length} Done',
+                                  '✨ ${user.healingXp} XP',
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.w800,
@@ -916,10 +940,77 @@ class DashboardScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 14),
+                          // Progress Bar
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value: todayRituals.isEmpty ? 0 : completedCount / todayRituals.length,
+                              minHeight: 8,
+                              backgroundColor: theme.colorScheme.onSurface.withAlpha(15),
+                              valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '$completedCount of ${todayRituals.length} Completed',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.secondary.withAlpha(200),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                '${((todayRituals.isEmpty ? 0 : completedCount / todayRituals.length) * 100).toInt()}% Complete',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Milestone Emotional Message
+                          if (completedCount > 0) ...[
+                            const SizedBox(height: 12),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primaryContainer.withAlpha(20),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: theme.colorScheme.primary.withAlpha(15),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Text('🌸', style: TextStyle(fontSize: 14)),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      completedCount == 1
+                                          ? 'You showed up for yourself today.'
+                                          : completedCount == 2
+                                              ? 'Healing happens through small steps.'
+                                              : 'Today, you chose yourself. ✨',
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        fontStyle: FontStyle.italic,
+                                        fontWeight: FontWeight.w600,
+                                        color: theme.colorScheme.onPrimaryContainer,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 8),
                           // Heart Tasks
                           _buildCategoryHeader(context, 'Heart', '💖', theme),
-                          ...AppTasks.defaultTasks
+                          ...todayRituals
                               .where((task) => task.category == 'Heart')
                               .map((task) {
                             final bool isDone = completedTasks.contains(task.id);
@@ -928,7 +1019,7 @@ class DashboardScreen extends ConsumerWidget {
                           const SizedBox(height: 8),
                           // Mind Tasks
                           _buildCategoryHeader(context, 'Mind', '🧠', theme),
-                          ...AppTasks.defaultTasks
+                          ...todayRituals
                               .where((task) => task.category == 'Mind')
                               .map((task) {
                             final bool isDone = completedTasks.contains(task.id);
@@ -937,14 +1028,14 @@ class DashboardScreen extends ConsumerWidget {
                           const SizedBox(height: 8),
                           // Body Tasks
                           _buildCategoryHeader(context, 'Body', '🌿', theme),
-                          ...AppTasks.defaultTasks
+                          ...todayRituals
                               .where((task) => task.category == 'Body')
                               .map((task) {
                             final bool isDone = completedTasks.contains(task.id);
                             return _buildGoalTile(context, ref, task, isDone, theme);
                           }),
                           // Completion Reward Card
-                          if (_getCompletedCount(completedTasks) == AppTasks.defaultTasks.length)
+                          if (completedCount == todayRituals.length && todayRituals.isNotEmpty)
                             _buildCompletionReward(context, theme),
                         ],
                       ),

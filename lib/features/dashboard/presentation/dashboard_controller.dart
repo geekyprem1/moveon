@@ -45,6 +45,14 @@ class DashboardController extends StateNotifier<AsyncValue<void>> {
       final dateStr = DateFormatter.toDateString(DateTime.now());
       await tasksRepo.toggleTask(user.uid, dateStr, taskId, completed);
 
+      // Update Healing XP (+5 for check, -5 for uncheck)
+      final int xpChange = completed ? 5 : -5;
+      final int newXp = (user.healingXp + xpChange).clamp(0, 9999999);
+      if (newXp != user.healingXp) {
+        final updatedUser = user.copyWith(healingXp: newXp);
+        await _ref.read(authRepositoryProvider).updateUser(updatedUser);
+      }
+
       // Log Analytics Event if task completed
       if (completed) {
         _ref.read(analyticsServiceProvider).logTaskCompleted(taskId);

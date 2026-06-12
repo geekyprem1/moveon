@@ -18,6 +18,7 @@ class AppUser {
   final String? referredBy;
   final String selectedTheme;
   final String themeMode;
+  final int healingXp;
   final DateTime createdAt;
   final DateTime lastActiveAt;
 
@@ -32,6 +33,7 @@ class AppUser {
     this.breakupType,
     this.lastContactDate,
     this.longestStreak = 0,
+    this.healingXp = 0,
     this.unlockedAchievements = const [],
     this.streakShieldsAvailable = 1,
     this.lastShieldResetDate,
@@ -73,6 +75,7 @@ class AppUser {
     String? breakupType,
     DateTime? lastContactDate,
     int? longestStreak,
+    int? healingXp,
     List<String>? unlockedAchievements,
     int? streakShieldsAvailable,
     DateTime? lastShieldResetDate,
@@ -94,6 +97,7 @@ class AppUser {
       breakupType: breakupType ?? this.breakupType,
       lastContactDate: lastContactDate ?? this.lastContactDate,
       longestStreak: longestStreak ?? this.longestStreak,
+      healingXp: healingXp ?? this.healingXp,
       unlockedAchievements: unlockedAchievements ?? this.unlockedAchievements,
       streakShieldsAvailable: streakShieldsAvailable ?? this.streakShieldsAvailable,
       lastShieldResetDate: lastShieldResetDate ?? this.lastShieldResetDate,
@@ -118,6 +122,7 @@ class AppUser {
       'breakupType': breakupType,
       'lastContactDate': lastContactDate != null ? Timestamp.fromDate(lastContactDate!) : null,
       'longestStreak': longestStreak,
+      'healingXp': healingXp,
       'unlockedAchievements': unlockedAchievements,
       'streakShieldsAvailable': streakShieldsAvailable,
       'lastShieldResetDate': lastShieldResetDate != null ? Timestamp.fromDate(lastShieldResetDate!) : null,
@@ -180,6 +185,7 @@ class AppUser {
       breakupType: json['breakupType'] as String?,
       lastContactDate: cDate ?? bDate, // Default last contact to breakup date
       longestStreak: json['longestStreak'] as int? ?? 0,
+      healingXp: json['healingXp'] as int? ?? 0,
       unlockedAchievements: (json['unlockedAchievements'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
